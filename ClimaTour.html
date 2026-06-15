@@ -1,0 +1,1163 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ClimaTour — туры по погоде</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+<style>
+  :root{
+    --navy:#15213d;
+    --navy-2:#1f2f54;
+    --cream:#faf6ec;
+    --paper:#ffffff;
+    --amber:#f2a640;
+    --terracotta:#e2613b;
+    --teal:#3f8e96;
+    --green:#7c9a3c;
+    --ink:#1a2233;
+    --muted:#6c7488;
+    --line:rgba(21,33,61,.12);
+    --line-light:rgba(255,255,255,.14);
+    --radius:14px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    font-family:'Inter',sans-serif;
+    color:var(--ink);
+    background:var(--cream);
+    line-height:1.55;
+  }
+  h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;letter-spacing:-.01em;}
+  .mono{font-family:'JetBrains Mono',monospace;}
+  a{color:inherit;}
+  img{display:block;max-width:100%;}
+  .wrap{max-width:1240px;margin:0 auto;padding:0 24px;}
+  .eyebrow{
+    font-family:'JetBrains Mono',monospace;
+    font-size:.75rem;letter-spacing:.18em;text-transform:uppercase;
+    color:var(--terracotta);font-weight:700;
+  }
+
+  /* ===== HEADER ===== */
+  header{
+    position:sticky;top:0;z-index:50;
+    background:rgba(250,246,236,.92);
+    backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line);
+  }
+  .nav{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;}
+  .logo{
+    font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.3rem;
+    display:flex;align-items:center;gap:8px;
+  }
+  .logo span{color:var(--terracotta);}
+  .nav-links{display:flex;gap:28px;list-style:none;font-weight:500;font-size:.95rem;}
+  .nav-links a{text-decoration:none;border-bottom:2px solid transparent;padding-bottom:4px;transition:border-color .2s;}
+  .nav-links a:hover{border-color:var(--terracotta);}
+  .nav-cta{
+    background:var(--navy);color:var(--cream);padding:10px 20px;border-radius:999px;
+    font-weight:600;font-size:.9rem;text-decoration:none;white-space:nowrap;
+  }
+  @media(max-width:760px){ .nav-links{display:none;} }
+
+  /* ===== HERO ===== */
+  .hero{
+    background:linear-gradient(180deg,var(--navy) 0%,var(--navy-2) 100%);
+    color:var(--cream);padding:64px 0 56px;
+  }
+  .hero-top{display:grid;grid-template-columns:1.1fr .9fr;gap:48px;align-items:end;margin-bottom:48px;}
+  .hero h1{font-size:clamp(2.2rem,4.2vw,3.4rem);font-weight:700;line-height:1.08;margin-bottom:18px;}
+  .hero h1 em{font-style:normal;color:var(--amber);}
+  .hero p.lead{color:#cfd6e8;font-size:1.05rem;max-width:480px;}
+  .hero-stats{display:flex;gap:28px;flex-wrap:wrap;}
+  .hero-stats div{font-family:'JetBrains Mono',monospace;}
+  .hero-stats b{display:block;font-size:1.9rem;color:var(--amber);}
+  .hero-stats small{color:#a9b2cc;font-size:.78rem;letter-spacing:.08em;}
+  @media(max-width:880px){ .hero-top{grid-template-columns:1fr;gap:24px;} }
+
+  /* ===== BOARD ===== */
+  .board{
+    background:#0f1830;border:1px solid rgba(242,166,64,.25);border-radius:var(--radius);
+    overflow:hidden;box-shadow:0 30px 60px -30px rgba(0,0,0,.6);
+  }
+  .board-head{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:14px 20px;border-bottom:1px solid rgba(242,166,64,.2);
+    font-family:'JetBrains Mono',monospace;font-size:.78rem;letter-spacing:.12em;
+    color:var(--amber);text-transform:uppercase;
+  }
+  .board-head .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#4ade80;margin-right:8px;animation:pulse 2s infinite;}
+  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
+  .board-row{
+    display:grid;grid-template-columns:90px 1.6fr 1.1fr .9fr 1.5fr;
+    align-items:center;gap:14px;padding:13px 20px;
+    border-bottom:1px solid rgba(255,255,255,.06);
+    font-family:'JetBrains Mono',monospace;font-size:.85rem;
+    transition:background .2s;
+  }
+  .board-row:last-child{border-bottom:none;}
+  .board-row:hover{background:rgba(255,255,255,.03);}
+  .board-row.col-head{
+    font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:#7d88a8;
+    border-bottom:1px solid rgba(242,166,64,.2);
+  }
+  .board-flight{color:var(--amber);font-weight:700;}
+  .board-dest{display:flex;flex-direction:column;}
+  .board-dest b{font-family:'Space Grotesk',sans-serif;font-size:1rem;letter-spacing:0;}
+  .board-dest span{color:#9aa4c2;font-size:.78rem;}
+  .board-weather{display:flex;align-items:center;gap:8px;}
+  .board-weather .ico{font-size:1.25rem;}
+  .board-weather .temp{font-weight:700;color:var(--cream);font-size:1rem;}
+  .board-weather .lbl{color:#9aa4c2;font-size:.72rem;display:block;}
+  .board-wind{color:#9aa4c2;}
+  .board-status{
+    font-size:.72rem;letter-spacing:.06em;padding:6px 10px;border-radius:6px;
+    background:rgba(242,166,64,.12);color:var(--amber);text-align:center;
+  }
+  .board-status.rain{background:rgba(63,142,150,.18);color:#7fd2da;}
+  .board-status.cold{background:rgba(63,142,150,.18);color:#7fd2da;}
+  .board-status.hot{background:rgba(226,97,59,.18);color:#ff9b7d;}
+  .board-status.load{background:rgba(255,255,255,.06);color:#7d88a8;}
+  @media(max-width:880px){
+    .board{overflow-x:auto;}
+    .board-row{grid-template-columns:70px 160px 130px 90px 150px;width:max-content;min-width:100%;}
+  }
+
+  /* ===== FEATURES ===== */
+  .features{padding:72px 0;}
+  .section-head{max-width:640px;margin-bottom:44px;}
+  .section-head h2{font-size:clamp(1.7rem,3vw,2.4rem);margin-top:10px;}
+  .section-head p{color:var(--muted);margin-top:10px;}
+  .feature-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;}
+  .feature-card{
+    background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);
+    padding:26px;
+  }
+  .feature-card .ico{font-size:1.8rem;}
+  .feature-card h3{margin:14px 0 8px;font-size:1.1rem;}
+  .feature-card p{color:var(--muted);font-size:.92rem;}
+  .feature-card .tag{
+    display:inline-block;margin-top:14px;font-family:'JetBrains Mono',monospace;
+    font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--terracotta);
+  }
+  @media(max-width:880px){ .feature-grid{grid-template-columns:1fr;} }
+
+  /* ===== SEARCH / FILTERS ===== */
+  .search{background:var(--navy);color:var(--cream);padding:56px 0;}
+  .search .section-head h2{color:var(--cream);}
+  .search .section-head p{color:#aab2cb;}
+  .search .eyebrow{color:var(--amber);}
+  .search-panel{
+    background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);
+    border-radius:var(--radius);padding:28px;display:grid;gap:20px;
+  }
+  .search-row{display:flex;flex-wrap:wrap;gap:14px;align-items:center;}
+  .search-input{
+    flex:1 1 240px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);
+    border-radius:10px;padding:13px 16px;color:var(--cream);font-size:.95rem;
+  }
+  .search-input::placeholder{color:#8b94b3;}
+  .chip{
+    display:flex;align-items:center;gap:8px;cursor:pointer;
+    background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);
+    border-radius:999px;padding:10px 18px;font-size:.88rem;font-weight:500;
+    transition:.2s;user-select:none;
+  }
+  .chip input{accent-color:var(--amber);width:16px;height:16px;}
+  .chip:hover{border-color:var(--amber);}
+  .chip.active{background:rgba(242,166,64,.18);border-color:var(--amber);color:var(--amber);}
+  .search-meta{font-family:'JetBrains Mono',monospace;font-size:.78rem;color:#aab2cb;}
+  .search-meta b{color:var(--amber);}
+
+  /* ===== CATALOG ===== */
+  .catalog{padding:72px 0;}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:24px;}
+  .card{
+    background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);
+    overflow:hidden;display:flex;flex-direction:column;transition:transform .2s,box-shadow .2s;
+  }
+  .card:hover{transform:translateY(-4px);box-shadow:0 18px 40px -24px rgba(21,33,61,.35);}
+  .card-media{position:relative;height:170px;overflow:hidden;}
+  .card-media img{width:100%;height:100%;object-fit:cover;}
+  .badge{
+    position:absolute;top:12px;right:12px;background:rgba(15,24,48,.78);color:var(--cream);
+    border-radius:999px;padding:6px 12px;display:flex;align-items:center;gap:6px;
+    font-family:'JetBrains Mono',monospace;font-size:.85rem;backdrop-filter:blur(4px);
+  }
+  .badge .ico{font-size:1.05rem;}
+  .card-flag{
+    position:absolute;top:12px;left:12px;background:rgba(255,255,255,.85);
+    border-radius:999px;padding:4px 10px;font-size:.78rem;font-weight:700;
+  }
+  .card-body{padding:18px 20px 22px;display:flex;flex-direction:column;gap:8px;flex:1;}
+  .card-body h3{font-size:1.15rem;}
+  .card-country{color:var(--muted);font-size:.82rem;margin-top:-6px;}
+  .card-desc{color:var(--muted);font-size:.88rem;flex:1;}
+  .tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px;}
+  .tags span{
+    background:var(--cream);border:1px solid var(--line);border-radius:999px;
+    padding:3px 10px;font-size:.74rem;color:var(--navy);font-weight:500;
+  }
+  .card-footer{display:flex;justify-content:space-between;align-items:center;margin-top:10px;}
+  .price b{font-family:'Space Grotesk',sans-serif;font-size:1.1rem;}
+  .price small{display:block;color:var(--muted);font-size:.74rem;}
+  .btn{
+    background:var(--navy);color:var(--cream);border:none;border-radius:999px;
+    padding:10px 18px;font-size:.85rem;font-weight:600;cursor:pointer;transition:.2s;
+  }
+  .btn:hover{background:var(--terracotta);}
+  .card.hide{display:none;}
+  .empty-msg{
+    grid-column:1/-1;text-align:center;color:var(--muted);padding:40px 0;
+    font-family:'JetBrains Mono',monospace;font-size:.9rem;
+  }
+
+  /* ===== ABOUT ===== */
+  .about{background:var(--paper);border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:64px 0;}
+  .about-grid{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center;}
+  .about-grid img{border-radius:var(--radius);width:100%;height:320px;object-fit:cover;}
+  .about-list{list-style:none;display:grid;gap:14px;margin-top:18px;}
+  .about-list li{display:flex;gap:12px;font-size:.94rem;}
+  .about-list b{font-family:'JetBrains Mono',monospace;color:var(--terracotta);}
+  @media(max-width:880px){ .about-grid{grid-template-columns:1fr;} .about-grid img{height:220px;} }
+
+  /* ===== FOOTER ===== */
+  footer{background:var(--navy);color:#aab2cb;padding:40px 0;font-size:.88rem;}
+  .foot-grid{display:flex;justify-content:space-between;flex-wrap:wrap;gap:16px;align-items:center;}
+  footer .logo{color:var(--cream);}
+  footer a{text-decoration:none;}
+
+  /* ===== MODAL ===== */
+  .overlay{
+    position:fixed;inset:0;background:rgba(15,24,48,.6);backdrop-filter:blur(3px);
+    display:flex;align-items:flex-start;justify-content:center;padding:40px 16px;
+    z-index:100;opacity:0;visibility:hidden;transition:opacity .25s;overflow-y:auto;
+  }
+  .overlay.open{opacity:1;visibility:visible;}
+  .modal{
+    background:var(--paper);border-radius:18px;max-width:760px;width:100%;
+    overflow:hidden;transform:translateY(18px);transition:transform .25s;
+  }
+  .overlay.open .modal{transform:translateY(0);}
+  .modal-media{position:relative;height:240px;}
+  .modal-media img{width:100%;height:100%;object-fit:cover;}
+  .modal-close{
+    position:absolute;top:14px;right:14px;width:36px;height:36px;border-radius:50%;
+    background:rgba(15,24,48,.7);color:#fff;border:none;font-size:1.2rem;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .modal-body{padding:26px 30px 32px;}
+  .modal-title{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;}
+  .modal-title h2{font-size:1.5rem;}
+  .modal-title .country{color:var(--muted);font-size:.9rem;margin-top:2px;}
+  .modal-price{text-align:right;}
+  .modal-price b{font-family:'Space Grotesk',sans-serif;font-size:1.4rem;}
+  .modal-price small{color:var(--muted);font-size:.78rem;}
+  .modal-desc{color:var(--muted);font-size:.95rem;margin:14px 0 20px;}
+  .now-weather{
+    display:flex;align-items:center;gap:18px;background:var(--cream);border-radius:12px;
+    padding:16px 20px;margin-bottom:22px;
+  }
+  .now-weather .ico{font-size:2.6rem;}
+  .now-weather .temp{font-family:'Space Grotesk',sans-serif;font-size:2rem;font-weight:700;}
+  .now-weather .meta{font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--muted);display:flex;gap:14px;flex-wrap:wrap;margin-top:4px;}
+  .modal h4{font-size:.95rem;margin-bottom:12px;}
+  .forecast-row{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:22px;}
+  .fcast{
+    border:1px solid var(--line);border-radius:10px;padding:10px 6px;text-align:center;
+    font-family:'JetBrains Mono',monospace;
+  }
+  .fcast .day{font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);}
+  .fcast .ico{font-size:1.4rem;margin:6px 0;}
+  .fcast .temps b{color:var(--ink);}
+  .fcast .temps span{color:var(--muted);}
+  .fcast .rain{font-size:.7rem;color:var(--teal);margin-top:4px;}
+  .tips{display:grid;gap:10px;}
+  .tips div{
+    background:var(--cream);border-radius:10px;padding:10px 14px;font-size:.88rem;
+    display:flex;gap:10px;align-items:flex-start;
+  }
+  @media(max-width:620px){
+    .forecast-row{grid-template-columns:repeat(5,minmax(70px,1fr));overflow-x:auto;}
+  }
+
+  /* ===== CARD ACTIONS / GHOST BUTTON ===== */
+  .card-actions{display:flex;gap:8px;flex-wrap:wrap;}
+  .btn-ghost{
+    background:transparent;color:var(--navy);border:1.5px solid var(--navy);
+  }
+  .btn-ghost:hover{background:var(--navy);color:var(--cream);}
+  .card-footer{flex-wrap:wrap;gap:10px;}
+
+  /* ===== MAP SECTION ===== */
+  .map-section{background:var(--paper);border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:64px 0;}
+  #map{height:480px;width:100%;border-radius:var(--radius);border:1px solid var(--line);z-index:1;}
+  .map-legend{display:flex;gap:22px;flex-wrap:wrap;margin-top:16px;font-size:.85rem;color:var(--muted);}
+  .map-legend span{display:inline-flex;align-items:center;gap:8px;}
+  .legend-dot{width:12px;height:12px;border-radius:50%;display:inline-block;border:1px solid rgba(0,0,0,.15);}
+  .map-popup{font-family:'Inter',sans-serif;min-width:170px;}
+  .map-popup b{font-family:'Space Grotesk',sans-serif;font-size:1rem;}
+  .map-popup .mp-meta{color:var(--muted);font-size:.82rem;display:block;margin-top:2px;}
+  .map-popup .mp-actions{display:flex;gap:6px;margin-top:10px;}
+  .map-popup .mp-actions button{
+    flex:1;border:1px solid var(--line);background:var(--cream);border-radius:8px;
+    padding:6px 8px;font-size:.78rem;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;
+  }
+  .map-popup .mp-actions button.primary{background:var(--navy);color:var(--cream);border-color:var(--navy);}
+  .map-popup .mp-actions button:hover{opacity:.85;}
+
+  /* ===== BOOKING FORM ===== */
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:18px;}
+  .form-field{display:flex;flex-direction:column;gap:6px;font-size:.85rem;font-weight:500;color:var(--ink);}
+  .form-field span{color:var(--muted);font-size:.78rem;letter-spacing:.04em;text-transform:uppercase;}
+  .form-field input{
+    border:1px solid var(--line);border-radius:8px;padding:11px 12px;font-size:.95rem;
+    font-family:'Inter',sans-serif;background:var(--cream);color:var(--ink);
+  }
+  .form-field input:focus{outline:2px solid var(--terracotta);outline-offset:1px;}
+  .form-grid .total-box,.form-grid > button{grid-column:1/-1;}
+  .total-box{
+    background:var(--cream);border-radius:10px;padding:14px 16px;font-size:1rem;
+    display:flex;justify-content:space-between;align-items:center;
+  }
+  .total-box b{font-family:'Space Grotesk',sans-serif;font-size:1.25rem;}
+  .form-grid > button[type="submit"]{padding:13px;font-size:.95rem;}
+  @media(max-width:560px){ .form-grid{grid-template-columns:1fr;} }
+
+  .success-box{text-align:center;padding:10px 0;}
+  .success-box .ico{font-size:2.6rem;margin-bottom:10px;}
+  .success-box .code{
+    font-family:'JetBrains Mono',monospace;background:var(--cream);border-radius:8px;
+    padding:10px 16px;display:inline-block;margin:12px 0;font-size:1.1rem;letter-spacing:.08em;
+  }
+  .success-box dl{display:grid;grid-template-columns:auto 1fr;gap:6px 16px;text-align:left;max-width:340px;margin:14px auto 0;font-size:.9rem;}
+  .success-box dt{color:var(--muted);}
+  .success-box dd{font-weight:600;}
+
+  /* ===== MY BOOKINGS ===== */
+  .bookings-section{padding:56px 0;display:none;}
+  .bookings-section.show{display:block;}
+  .booking-list{display:grid;gap:12px;margin-top:24px;}
+  .booking-item{
+    background:var(--paper);border:1px solid var(--line);border-radius:12px;
+    padding:16px 20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;
+  }
+  .booking-item .bi-main b{font-family:'Space Grotesk',sans-serif;}
+  .booking-item .bi-main span{color:var(--muted);font-size:.85rem;display:block;margin-top:2px;}
+  .booking-item .bi-code{
+    font-family:'JetBrains Mono',monospace;background:var(--cream);border-radius:8px;
+    padding:6px 12px;font-size:.85rem;color:var(--terracotta);font-weight:700;
+  }
+</style>
+</head>
+<body>
+
+<!-- ================= HEADER ================= -->
+<header>
+  <nav class="nav wrap">
+    <div class="logo">✈ Clima<span>Tour</span></div>
+    <ul class="nav-links">
+      <li><a href="#board">Табло погоды</a></li>
+      <li><a href="#search">Поиск</a></li>
+      <li><a href="#map-section">Карта</a></li>
+      <li><a href="#catalog">Каталог туров</a></li>
+      <li><a href="#about">О сервисе</a></li>
+    </ul>
+    <a href="#search" class="nav-cta">Подобрать тур по погоде</a>
+  </nav>
+</header>
+
+<!-- ================= HERO + BOARD ================= -->
+<section class="hero" id="board">
+  <div class="wrap">
+    <div class="hero-top">
+      <div>
+        <div class="eyebrow">Погодный трекер для путешествий</div>
+        <h1>Выбирайте тур, глядя на <em>реальную погоду</em>, а не на старые фото в каталоге</h1>
+        <p class="lead">Живые данные температуры, осадков и ветра прямо в карточках направлений — табло обновляется при загрузке страницы, как в аэропорту.</p>
+      </div>
+      <div class="hero-stats">
+        <div><b>24</b><small>НАПРАВЛЕНИЙ ОНЛАЙН</small></div>
+        <div><b>5 ДНЕЙ</b><small>ПРОГНОЗ НА СТРАНИЦЕ ТУРА</small></div>
+        <div><b>4</b><small>WEATHER-ФИЛЬТРА ПОИСКА</small></div>
+      </div>
+    </div>
+
+    <div class="board">
+      <div class="board-head">
+        <span><span class="dot"></span>ТАБЛО ВЫЛЕТОВ · ПОГОДА В НАПРАВЛЕНИЯХ</span>
+        <span id="board-time">ОБНОВЛЕНИЕ…</span>
+      </div>
+      <div class="board-row col-head">
+        <div>Рейс</div>
+        <div>Направление</div>
+        <div>Сейчас</div>
+        <div>Ветер</div>
+        <div>Совет в дорогу</div>
+      </div>
+      <div id="board-body"><!-- rows injected by JS --></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= FEATURES ================= -->
+<section class="features">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">Как мы используем погоду</div>
+      <h2>Три способа спланировать поездку точнее</h2>
+      <p>Мы подключили реальные метеоданные к каждому этапу выбора тура — от каталога до деталей маршрута.</p>
+    </div>
+    <div class="feature-grid">
+      <div class="feature-card">
+        <div class="ico">🌡️</div>
+        <h3>Погода прямо в каталоге</h3>
+        <p>У каждой страны и города — иконка погоды и температура в реальном времени, чтобы не открывать десятки вкладок.</p>
+        <span class="tag">Каталог туров</span>
+      </div>
+      <div class="feature-card">
+        <div class="ico">🔍</div>
+        <h3>Поиск по погодным условиям</h3>
+        <p>Фильтры «тёплая погода», «без дождя», «пляжный отдых» и «не жарче 28°C» сразу сузят список до подходящих направлений.</p>
+        <span class="tag">Форма поиска</span>
+      </div>
+      <div class="feature-card">
+        <div class="ico">🧳</div>
+        <h3>Прогноз и советы по сборам</h3>
+        <p>На странице тура — прогноз на 5 дней: влажность, ветер, вероятность дождя и подсказки, что взять с собой.</p>
+        <span class="tag">Страница тура</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= SEARCH ================= -->
+<section class="search" id="search">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">Подбор тура</div>
+      <h2>Найдите направление под нужную погоду</h2>
+      <p>Фильтры применяются к турам прямо в каталоге ниже — данные берутся из их текущей погоды.</p>
+    </div>
+    <div class="search-panel">
+      <div class="search-row">
+        <input type="text" class="search-input" id="searchText" placeholder="Город или страна, например «Бали»…">
+      </div>
+      <div class="search-row">
+        <label class="chip" data-filter="warm"><input type="checkbox" id="f-warm"> ☀️ Хочу тёплую погоду (от +22°C)</label>
+        <label class="chip" data-filter="norain"><input type="checkbox" id="f-norain"> 🌂 Без дождя</label>
+        <label class="chip" data-filter="beach"><input type="checkbox" id="f-beach"> 🏖️ Пляжный отдых</label>
+        <label class="chip" data-filter="max28"><input type="checkbox" id="f-max28"> 🌤️ Не жарче +28°C</label>
+      </div>
+      <div class="search-meta" id="search-meta">Загружаем данные о погоде по всем направлениям…</div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= MAP ================= -->
+<section class="map-section" id="map-section">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">Карта направлений</div>
+      <h2>Найдите страну или город на карте и купите тур</h2>
+      <p>Кликните на точку — увидите текущую погоду, цену тура и сможете сразу открыть бронирование или подробности маршрута.</p>
+    </div>
+    <div id="map"></div>
+    <div class="map-legend">
+      <span><span class="legend-dot" style="background:var(--teal);"></span>Пляжный отдых</span>
+      <span><span class="legend-dot" style="background:var(--green);"></span>Природа / экотуризм</span>
+      <span><span class="legend-dot" style="background:var(--amber);"></span>Городские туры и экскурсии</span>
+    </div>
+  </div>
+</section>
+
+<!-- ================= CATALOG ================= -->
+<section class="catalog" id="catalog">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">Каталог</div>
+      <h2>Туры с актуальной погодой</h2>
+      <p>Нажмите «Подробнее», чтобы увидеть прогноз на 5 дней, влажность, ветер и советы для конкретного маршрута.</p>
+    </div>
+    <div class="grid" id="catalog-grid"><!-- cards injected by JS --></div>
+  </div>
+</section>
+
+<!-- ================= ABOUT ================= -->
+<section class="about" id="about">
+  <div class="wrap about-grid">
+    <div>
+      <div class="eyebrow">О сервисе</div>
+      <h2 style="margin-top:10px;font-size:clamp(1.6rem,3vw,2.2rem);">ClimaTour — туры, которые учитывают прогноз</h2>
+      <p style="color:var(--muted);margin-top:12px;">Мы объединили классическое турагентство с живым метеотрекером: вместо «среднегодовой температуры» вы видите, что происходит в направлении прямо сейчас и в ближайшие дни.</p>
+      <ul class="about-list">
+        <li><b>01</b> Данные обновляются при каждом открытии сайта — иконки и температура реальные.</li>
+        <li><b>02</b> Фильтры поиска понимают формулировки «без дождя» и «не жарче 28°C», а не только названия городов.</li>
+        <li><b>03</b> На странице каждого тура — прогноз на 5 дней с влажностью, ветром и шансом дождя.</li>
+        <li><b>04</b> Подсказки по вещам формируются автоматически: куртка, зонт, крем от солнца или удобная обувь.</li>
+      </ul>
+    </div>
+    <img src="https://picsum.photos/seed/meteotour-about/640/640" alt="Карта направлений">
+  </div>
+</section>
+
+<!-- ================= MY BOOKINGS ================= -->
+<section class="bookings-section" id="bookingsSection">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">Личный кабинет</div>
+      <h2>Мои бронирования</h2>
+      <p>Список туров, оформленных в этой сессии.</p>
+    </div>
+    <div class="booking-list" id="bookingList"></div>
+  </div>
+</section>
+
+<!-- ================= FOOTER ================= -->
+<footer>
+  <div class="wrap foot-grid">
+    <div class="logo">✈ Clima<span style="color:var(--amber);">Tour</span></div>
+    <div>Данные о погоде предоставлены <a href="https://open-meteo.com" target="_blank" style="color:var(--amber);">Open-Meteo</a></div>
+    <div>© 2026 ClimaTour. Все направления — для демонстрации.</div>
+  </div>
+</footer>
+
+<!-- ================= MODAL ================= -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <button class="modal-close" id="modalClose">×</button>
+    <div class="modal-media"><img id="modalImg" src="" alt=""></div>
+    <div class="modal-body" id="modalBody"><!-- injected by JS --></div>
+  </div>
+</div>
+
+<!-- ================= BOOKING MODAL ================= -->
+<div class="overlay" id="bookingOverlay">
+  <div class="modal">
+    <button class="modal-close" id="bookingClose">×</button>
+    <div class="modal-body" id="bookingBody" style="padding-top:30px;"><!-- injected by JS --></div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<script>
+/* ============================================================
+   DATA: направления тур-агентства
+   ============================================================ */
+const DESTINATIONS = [
+  {id:'paris', flight:'MT-101', city:'Париж', country:'Франция', flag:'🇫🇷', lat:48.8566, lon:2.3522,
+   tags:['city','excursion'], price:52000, nights:5, img:'https://picsum.photos/seed/paris-tour/640/420',
+   desc:'Город света: Эйфелева башня, Лувр и круассаны на каждом углу.'},
+  {id:'rome', flight:'MT-108', city:'Рим', country:'Италия', flag:'🇮🇹', lat:41.9028, lon:12.4964,
+   tags:['city','excursion','history'], price:48000, nights:5, img:'https://picsum.photos/seed/rome-tour/640/420',
+   desc:'Колизей, фонтаны и паста аль денте — вечный город ждёт.'},
+  {id:'barcelona', flight:'MT-115', city:'Барселона', country:'Испания', flag:'🇪🇸', lat:41.3851, lon:2.1734,
+   tags:['beach','city','excursion'], price:56000, nights:6, img:'https://picsum.photos/seed/barcelona-tour/640/420',
+   desc:'Архитектура Гауди и пляжи Средиземного моря в одном городе.'},
+  {id:'dubai', flight:'MT-204', city:'Дубай', country:'ОАЭ', flag:'🇦🇪', lat:25.2048, lon:55.2708,
+   tags:['beach','shopping'], price:89000, nights:7, img:'https://picsum.photos/seed/dubai-tour/640/420',
+   desc:'Небоскрёбы, пустыня на джипах и пляжи Персидского залива.'},
+  {id:'bali', flight:'MT-318', city:'Бали', country:'Индонезия', flag:'🇮🇩', lat:-8.6500, lon:115.2167,
+   tags:['beach','nature'], price:99000, nights:8, img:'https://picsum.photos/seed/bali-tour/640/420',
+   desc:'Рисовые террасы, храмы и океан — остров богов.'},
+  {id:'phuket', flight:'MT-322', city:'Пхукет', country:'Таиланд', flag:'🇹🇭', lat:7.8804, lon:98.3923,
+   tags:['beach'], price:78000, nights:9, img:'https://picsum.photos/seed/phuket-tour/640/420',
+   desc:'Тёплое море, белый песок и тайская кухня день и ночь.'},
+  {id:'sharm', flight:'MT-130', city:'Шарм-эль-Шейх', country:'Египет', flag:'🇪🇬', lat:27.9158, lon:34.3300,
+   tags:['beach','diving'], price:65000, nights:7, img:'https://picsum.photos/seed/sharm-tour/640/420',
+   desc:'Коралловые рифы Красного моря и солнце круглый год.'},
+  {id:'santorini', flight:'MT-142', city:'Санторини', country:'Греция', flag:'🇬🇷', lat:36.3932, lon:25.4615,
+   tags:['beach','romance','excursion'], price:92000, nights:6, img:'https://picsum.photos/seed/santorini-tour/640/420',
+   desc:'Белые домики, синие купола и закаты над вулканом.'},
+  {id:'antalya', flight:'MT-150', city:'Анталья', country:'Турция', flag:'🇹🇷', lat:36.8969, lon:30.7133,
+   tags:['beach'], price:58000, nights:7, img:'https://picsum.photos/seed/antalya-tour/640/420',
+   desc:'Всё включено, тёплое море и горы Тавр на горизонте.'},
+  {id:'reykjavik', flight:'MT-407', city:'Рейкьявик', country:'Исландия', flag:'🇮🇸', lat:64.1466, lon:-21.9426,
+   tags:['nature','excursion'], price:110000, nights:5, img:'https://picsum.photos/seed/reykjavik-tour/640/420',
+   desc:'Гейзеры, водопады и охота за северным сиянием.'},
+  {id:'tokyo', flight:'MT-512', city:'Токио', country:'Япония', flag:'🇯🇵', lat:35.6762, lon:139.6503,
+   tags:['city','excursion'], price:105000, nights:7, img:'https://picsum.photos/seed/tokyo-tour/640/420',
+   desc:'Неон, храмы и лучшая еда в мире в одном мегаполисе.'},
+  {id:'maldives', flight:'MT-330', city:'Мале (Мальдивы)', country:'Мальдивы', flag:'🇲🇻', lat:4.1755, lon:73.5093,
+   tags:['beach','luxury'], price:145000, nights:7, img:'https://picsum.photos/seed/maldives-tour/640/420',
+   desc:'Бунгало над водой и бирюзовая лагуна вокруг.'},
+  {id:'vienna', flight:'MT-160', city:'Вена', country:'Австрия', flag:'🇦🇹', lat:48.2082, lon:16.3738,
+   tags:['city','excursion','history'], price:61000, nights:5, img:'https://picsum.photos/seed/vienna-tour/640/420',
+   desc:'Дворцы Габсбургов, опера и кофейни со штруделем.'},
+  {id:'prague', flight:'MT-167', city:'Прага', country:'Чехия', flag:'🇨🇿', lat:50.0755, lon:14.4378,
+   tags:['city','excursion','history'], price:46000, nights:5, img:'https://picsum.photos/seed/prague-tour/640/420',
+   desc:'Карлов мост, Пражский град и пиво в каждом дворике.'},
+  {id:'lisbon', flight:'MT-173', city:'Лиссабон', country:'Португалия', flag:'🇵🇹', lat:38.7223, lon:-9.1393,
+   tags:['city','beach','excursion'], price:57000, nights:6, img:'https://picsum.photos/seed/lisbon-tour/640/420',
+   desc:'Трамваи, фаду и побережье Атлантики рядом.'},
+  {id:'amsterdam', flight:'MT-181', city:'Амстердам', country:'Нидерланды', flag:'🇳🇱', lat:52.3676, lon:4.9041,
+   tags:['city','excursion'], price:63000, nights:4, img:'https://picsum.photos/seed/amsterdam-tour/640/420',
+   desc:'Каналы, музеи и велосипеды на каждом углу.'},
+  {id:'istanbul', flight:'MT-190', city:'Стамбул', country:'Турция', flag:'🇹🇷', lat:41.0082, lon:28.9784,
+   tags:['city','excursion','history'], price:49000, nights:6, img:'https://picsum.photos/seed/istanbul-tour/640/420',
+   desc:'Босфор, базары и смешение Европы и Азии.'},
+  {id:'marrakech', flight:'MT-205', city:'Марракеш', country:'Марокко', flag:'🇲🇦', lat:31.6295, lon:-7.9811,
+   tags:['city','excursion'], price:54000, nights:6, img:'https://picsum.photos/seed/marrakech-tour/640/420',
+   desc:'Медина, специи и атмосфера тысячи и одной ночи.'},
+  {id:'capetown', flight:'MT-410', city:'Кейптаун', country:'ЮАР', flag:'🇿🇦', lat:-33.9249, lon:18.4241,
+   tags:['nature','beach','excursion'], price:120000, nights:8, img:'https://picsum.photos/seed/capetown-tour/640/420',
+   desc:'Столовая гора, океан и винодельни в окрестностях.'},
+  {id:'zanzibar', flight:'MT-345', city:'Занзибар', country:'Танзания', flag:'🇹🇿', lat:-6.1659, lon:39.2026,
+   tags:['beach'], price:108000, nights:8, img:'https://picsum.photos/seed/zanzibar-tour/640/420',
+   desc:'Белоснежные пляжи и специи Индийского океана.'},
+  {id:'cancun', flight:'MT-360', city:'Канкун', country:'Мексика', flag:'🇲🇽', lat:21.1619, lon:-86.8515,
+   tags:['beach','luxury'], price:132000, nights:7, img:'https://picsum.photos/seed/cancun-tour/640/420',
+   desc:'Карибское море, сенотес и руины майя рядом.'},
+  {id:'sydney', flight:'MT-520', city:'Сидней', country:'Австралия', flag:'🇦🇺', lat:-33.8688, lon:151.2093,
+   tags:['city','beach','excursion'], price:140000, nights:9, img:'https://picsum.photos/seed/sydney-tour/640/420',
+   desc:'Опера, пляж Бонди и энергия большого города.'},
+  {id:'goa', flight:'MT-335', city:'Гоа', country:'Индия', flag:'🇮🇳', lat:15.2993, lon:74.1240,
+   tags:['beach','nature'], price:74000, nights:9, img:'https://picsum.photos/seed/goa-tour/640/420',
+   desc:'Пляжи, специи и расслабленная атмосфера побережья.'},
+  {id:'newyork', flight:'MT-601', city:'Нью-Йорк', country:'США', flag:'🇺🇸', lat:40.7128, lon:-74.0060,
+   tags:['city','excursion','shopping'], price:118000, nights:6, img:'https://picsum.photos/seed/newyork-tour/640/420',
+   desc:'Бродвей, небоскрёбы и энергия мегаполиса.'},
+];
+
+const TAG_LABELS = {
+  beach:'Пляж', city:'Город', excursion:'Экскурсии', nature:'Природа',
+  history:'История', romance:'Романтика', shopping:'Шопинг', diving:'Дайвинг', luxury:'Люкс'
+};
+
+/* ============================================================
+   ПОГОДА: коды Open-Meteo -> иконка / текст
+   ============================================================ */
+const RAIN_CODES = new Set([51,53,55,56,57,61,63,65,66,67,80,81,82,95,96,99]);
+
+function weatherInfo(code){
+  const map = {
+    0:['☀️','Ясно'], 1:['🌤️','Преим. ясно'], 2:['⛅','Облачно с прояснениями'], 3:['☁️','Облачно'],
+    45:['🌫️','Туман'], 48:['🌫️','Туман'],
+    51:['🌦️','Морось'], 53:['🌦️','Морось'], 55:['🌦️','Морось'],
+    56:['🌧️','Ледяная морось'], 57:['🌧️','Ледяная морось'],
+    61:['🌧️','Дождь'], 63:['🌧️','Дождь'], 65:['🌧️','Сильный дождь'],
+    66:['🌧️','Ледяной дождь'], 67:['🌧️','Ледяной дождь'],
+    71:['❄️','Снег'], 73:['❄️','Снег'], 75:['❄️','Сильный снег'], 77:['❄️','Снежные зёрна'],
+    80:['🌦️','Ливень'], 81:['🌦️','Ливень'], 82:['⛈️','Сильный ливень'],
+    85:['🌨️','Снегопад'], 86:['🌨️','Снегопад'],
+    95:['⛈️','Гроза'], 96:['⛈️','Гроза с градом'], 99:['⛈️','Сильная гроза'],
+  };
+  return map[code] || ['🌡️','—'];
+}
+
+function weatherURL(lat, lon){
+  return `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}` +
+         `&current_weather=true&hourly=relative_humidity_2m` +
+         `&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_probability_max,windspeed_10m_max` +
+         `&timezone=auto&forecast_days=5`;
+}
+
+const weatherStore = {}; // id -> open-meteo response
+
+/* ============================================================
+   РЕКОМЕНДАЦИИ
+   ============================================================ */
+function shortAdvice(dest, data){
+  const cw = data.current_weather;
+  const rainSoon = RAIN_CODES.has(cw.weathercode) || data.daily.precipitation_probability_max[0] >= 50;
+  if (rainSoon) return {text:'Возьмите зонт ☔', cls:'rain'};
+  if (cw.temperature <= 10) return {text:'Нужна тёплая куртка 🧥', cls:'cold'};
+  if (cw.temperature >= 30) return {text:'Жара — пейте воду 💧', cls:'hot'};
+  if (dest.tags.includes('beach') && cw.temperature >= 24) return {text:'Идеально для пляжа 🏖️', cls:''};
+  if (dest.tags.includes('excursion') || dest.tags.includes('city')) return {text:'Удобная обувь для прогулок 👟', cls:''};
+  return {text:'Комфортная погода 👍', cls:''};
+}
+
+function packingTips(dest, data){
+  const cw = data.current_weather;
+  const daily = data.daily;
+  const maxRain = Math.max(...daily.precipitation_probability_max.slice(0,5));
+  const tips = [];
+
+  if (cw.temperature <= 10) tips.push('🧥 Возьмите тёплую куртку — вечера и утро прохладные.');
+  else if (cw.temperature <= 16) tips.push('🧥 Пригодится лёгкая куртка или свитер для вечера.');
+  else if (cw.temperature >= 29) tips.push('🧴 Солнцезащитный крем, головной убор и лёгкая одежда — будет жарко.');
+  else tips.push('👕 Лёгкая повседневная одежда подойдёт для большей части поездки.');
+
+  if (maxRain >= 50) tips.push('☔ В ближайшие дни вероятен дождь — возьмите зонт или дождевик.');
+  else tips.push('🌂 Дождь по прогнозу не ожидается — можно обойтись без зонта.');
+
+  if (cw.windspeed >= 25) tips.push('💨 Ожидается ветер — пригодится ветровка или плотная куртка.');
+
+  if (dest.tags.includes('beach')) {
+    if (cw.temperature >= 23 && maxRain < 50) tips.push('🏖️ Погода отлично подходит для пляжного отдыха.');
+    else tips.push('🏖️ Для пляжа условия так себе — лучше запланировать экскурсии или спа.');
+  }
+  if (dest.tags.includes('excursion') || dest.tags.includes('city')) {
+    tips.push('👟 Удобная обувь для долгих прогулок и экскурсий — must have.');
+  }
+  if (dest.tags.includes('nature')) {
+    tips.push('🥾 Подойдёт треккинговая обувь и непромокаемая одежда для природных маршрутов.');
+  }
+  if (dest.tags.includes('diving')) {
+    tips.push('🤿 Возьмите быстросохнущее полотенце и термокостюм лёгкого типа для дайвинга.');
+  }
+  return tips;
+}
+
+/* ============================================================
+   РЕНДЕР: ТАБЛО
+   ============================================================ */
+const boardBody = document.getElementById('board-body');
+
+function renderBoardSkeleton(){
+  boardBody.innerHTML = DESTINATIONS.map(d => `
+    <div class="board-row" id="board-${d.id}">
+      <div class="board-flight">${d.flight}</div>
+      <div class="board-dest"><b>${d.flag} ${d.city}</b><span>${d.country}</span></div>
+      <div class="board-weather"><span class="ico">…</span><span class="temp mono">—</span></div>
+      <div class="board-wind mono">—</div>
+      <div class="board-status load">Загрузка…</div>
+    </div>
+  `).join('');
+}
+
+function updateBoardRow(dest, data){
+  const row = document.getElementById('board-' + dest.id);
+  if (!row) return;
+  const cw = data.current_weather;
+  const [ico, label] = weatherInfo(cw.weathercode);
+  const advice = shortAdvice(dest, data);
+  row.querySelector('.board-weather').innerHTML =
+    `<span class="ico">${ico}</span><span class="temp mono">${Math.round(cw.temperature)}°C</span><span class="lbl">${label}</span>`;
+  row.querySelector('.board-wind').textContent = `${Math.round(cw.windspeed)} км/ч`;
+  const status = row.querySelector('.board-status');
+  status.textContent = advice.text;
+  status.className = 'board-status ' + advice.cls;
+}
+
+/* ============================================================
+   РЕНДЕР: КАТАЛОГ
+   ============================================================ */
+const grid = document.getElementById('catalog-grid');
+
+function renderCatalog(){
+  grid.innerHTML = DESTINATIONS.map(d => `
+    <article class="card" id="card-${d.id}" data-id="${d.id}">
+      <div class="card-media">
+        <img src="${d.img}" alt="${d.city}" loading="lazy">
+        <div class="card-flag">${d.flag} ${d.country}</div>
+        <div class="badge" id="badge-${d.id}"><span class="ico">…</span><span class="mono">—</span></div>
+      </div>
+      <div class="card-body">
+        <h3>${d.city}</h3>
+        <div class="card-country">${d.nights} ночей · от ${d.price.toLocaleString('ru-RU')} ₽</div>
+        <p class="card-desc">${d.desc}</p>
+        <div class="tags">${d.tags.map(t => `<span>${TAG_LABELS[t] || t}</span>`).join('')}</div>
+        <div class="card-footer">
+          <div class="price"><b>${d.price.toLocaleString('ru-RU')} ₽</b><small>за человека / ${d.nights} ноч.</small></div>
+          <div class="card-actions">
+            <button class="btn btn-ghost" data-book="${d.id}">Забронировать</button>
+            <button class="btn" data-open="${d.id}">Подробнее →</button>
+          </div>
+        </div>
+      </div>
+    </article>
+  `).join('');
+
+  grid.querySelectorAll('[data-open]').forEach(btn => {
+    btn.addEventListener('click', () => openModal(btn.dataset.open));
+  });
+  grid.querySelectorAll('[data-book]').forEach(btn => {
+    btn.addEventListener('click', () => openBooking(btn.dataset.book));
+  });
+}
+
+function updateBadge(dest, data){
+  const badge = document.getElementById('badge-' + dest.id);
+  if (!badge) return;
+  const cw = data.current_weather;
+  const [ico] = weatherInfo(cw.weathercode);
+  badge.innerHTML = `<span class="ico">${ico}</span><span class="mono">${Math.round(cw.temperature)}°C</span>`;
+}
+
+/* ============================================================
+   ФИЛЬТРЫ ПОИСКА
+   ============================================================ */
+const searchText = document.getElementById('searchText');
+const filterIds = ['warm','norain','beach','max28'];
+const filterEls = {};
+filterIds.forEach(id => filterEls[id] = document.getElementById('f-' + id));
+
+function anyWeatherFilterActive(){
+  return filterEls.warm.checked || filterEls.norain.checked || filterEls.max28.checked;
+}
+
+function passesFilters(dest){
+  const text = searchText.value.trim().toLowerCase();
+  if (text && !(dest.city.toLowerCase().includes(text) || dest.country.toLowerCase().includes(text))) {
+    return false;
+  }
+  if (filterEls.beach.checked && !dest.tags.includes('beach')) return false;
+
+  const data = weatherStore[dest.id];
+  if (!data) return !anyWeatherFilterActive();
+
+  const cw = data.current_weather;
+  const maxRain = Math.max(...data.daily.precipitation_probability_max.slice(0,3));
+  const rainy = RAIN_CODES.has(cw.weathercode) || maxRain >= 40;
+
+  if (filterEls.warm.checked && cw.temperature < 22) return false;
+  if (filterEls.norain.checked && rainy) return false;
+  if (filterEls.max28.checked && cw.temperature > 28) return false;
+  return true;
+}
+
+function applyFilters(){
+  let visible = 0;
+  DESTINATIONS.forEach(d => {
+    const card = document.getElementById('card-' + d.id);
+    if (!card) return;
+    const ok = passesFilters(d);
+    if (ok) { card.classList.remove('hide'); visible++; }
+    else { card.classList.add('hide'); }
+
+    const marker = markerStore[d.id];
+    if (marker) {
+      marker.setStyle({ fillOpacity: ok ? 0.85 : 0.1, opacity: ok ? 1 : 0.25 });
+    }
+  });
+
+  let emptyMsg = document.getElementById('empty-msg');
+  if (visible === 0) {
+    if (!emptyMsg) {
+      emptyMsg = document.createElement('div');
+      emptyMsg.id = 'empty-msg';
+      emptyMsg.className = 'empty-msg';
+      emptyMsg.textContent = 'Ничего не нашлось под такие условия — попробуйте снять один из фильтров.';
+      grid.appendChild(emptyMsg);
+    }
+  } else if (emptyMsg) {
+    emptyMsg.remove();
+  }
+
+  const meta = document.getElementById('search-meta');
+  const loaded = Object.keys(weatherStore).length;
+  if (loaded < DESTINATIONS.length) {
+    meta.textContent = `Загружена погода для ${loaded} из ${DESTINATIONS.length} направлений…`;
+  } else {
+    meta.innerHTML = `Показано направлений: <b>${visible}</b> из ${DESTINATIONS.length}. Погода обновлена только что.`;
+  }
+}
+
+[searchText, ...filterIds.map(id => filterEls[id])].forEach(el => {
+  el.addEventListener('input', () => {
+    filterIds.forEach(id => {
+      const chip = filterEls[id].closest('.chip');
+      chip.classList.toggle('active', filterEls[id].checked);
+    });
+    applyFilters();
+  });
+});
+
+/* ============================================================
+   МОДАЛЬНОЕ ОКНО — СТРАНИЦА ТУРА
+   ============================================================ */
+const overlay = document.getElementById('overlay');
+const modalImg = document.getElementById('modalImg');
+const modalBody = document.getElementById('modalBody');
+
+const WEEKDAY_FMT = new Intl.DateTimeFormat('ru-RU', { weekday: 'short' });
+
+function findHumidity(data){
+  const idx = data.hourly.time.indexOf(data.current_weather.time);
+  const i = idx >= 0 ? idx : 0;
+  return data.hourly.relative_humidity_2m[i];
+}
+
+function openModal(id){
+  const dest = DESTINATIONS.find(d => d.id === id);
+  const data = weatherStore[id];
+  modalImg.src = dest.img;
+  modalImg.alt = dest.city;
+
+  if (!data) {
+    modalBody.innerHTML = `<div class="modal-title"><div><h2>${dest.flag} ${dest.city}</h2>
+      <div class="country">${dest.country}</div></div></div>
+      <p class="modal-desc">Данные о погоде ещё загружаются, попробуйте открыть тур чуть позже.</p>
+      <button class="btn" style="width:100%;margin-top:10px;padding:14px;font-size:1rem;" data-book="${dest.id}" id="modalBookBtn">Забронировать этот тур →</button>`;
+  } else {
+    const cw = data.current_weather;
+    const [ico, label] = weatherInfo(cw.weathercode);
+    const humidity = findHumidity(data);
+
+    const forecastHtml = data.daily.time.map((date, i) => {
+      const [fIco] = weatherInfo(data.daily.weathercode[i]);
+      const d = new Date(date + 'T00:00:00');
+      const day = i === 0 ? 'Сегодня' : WEEKDAY_FMT.format(d);
+      return `
+        <div class="fcast">
+          <div class="day">${day}</div>
+          <div class="ico">${fIco}</div>
+          <div class="temps"><b>${Math.round(data.daily.temperature_2m_max[i])}°</b> <span>${Math.round(data.daily.temperature_2m_min[i])}°</span></div>
+          <div class="rain">💧 ${data.daily.precipitation_probability_max[i]}%</div>
+        </div>`;
+    }).join('');
+
+    const tipsHtml = packingTips(dest, data).map(t => `<div>${t}</div>`).join('');
+
+    modalBody.innerHTML = `
+      <div class="modal-title">
+        <div>
+          <h2>${dest.flag} ${dest.city}</h2>
+          <div class="country">${dest.country} · ${dest.nights} ночей · рейс ${dest.flight}</div>
+        </div>
+        <div class="modal-price">
+          <b>${dest.price.toLocaleString('ru-RU')} ₽</b>
+          <small>за человека</small>
+        </div>
+      </div>
+      <p class="modal-desc">${dest.desc}</p>
+
+      <div class="now-weather">
+        <div class="ico">${ico}</div>
+        <div>
+          <div class="temp">${Math.round(cw.temperature)}°C · ${label}</div>
+          <div class="meta">
+            <span>💧 Влажность: ${humidity}%</span>
+            <span>💨 Ветер: ${Math.round(cw.windspeed)} км/ч</span>
+            <span>🌧️ Вероятность дождя сегодня: ${data.daily.precipitation_probability_max[0]}%</span>
+          </div>
+        </div>
+      </div>
+
+      <h4>Прогноз на 5 дней</h4>
+      <div class="forecast-row">${forecastHtml}</div>
+
+      <h4>Что взять в поездку</h4>
+      <div class="tips">${tipsHtml}</div>
+
+      <button class="btn" style="width:100%;margin-top:22px;padding:14px;font-size:1rem;" data-book="${dest.id}" id="modalBookBtn">Забронировать этот тур →</button>
+    `;
+  }
+
+  overlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
+
+  const bookBtn = document.getElementById('modalBookBtn');
+  if (bookBtn) bookBtn.addEventListener('click', () => { closeModal(); openBooking(id); });
+}
+
+function closeModal(){
+  overlay.classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.getElementById('modalClose').addEventListener('click', closeModal);
+overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+/* ============================================================
+   БРОНИРОВАНИЕ ТУРОВ
+   ============================================================ */
+const bookingOverlay = document.getElementById('bookingOverlay');
+const bookingBody = document.getElementById('bookingBody');
+const bookings = [];
+let currentBookingDest = null;
+
+function closeBooking(){
+  bookingOverlay.classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.getElementById('bookingClose').addEventListener('click', closeBooking);
+bookingOverlay.addEventListener('click', e => { if (e.target === bookingOverlay) closeBooking(); });
+
+function updateBookingTotal(){
+  const people = Math.max(1, parseInt(document.getElementById('bk-people').value, 10) || 1);
+  const totalEl = document.getElementById('bk-total');
+  if (totalEl) totalEl.textContent = (currentBookingDest.price * people).toLocaleString('ru-RU') + ' ₽';
+}
+
+function openBooking(id){
+  const dest = DESTINATIONS.find(d => d.id === id);
+  currentBookingDest = dest;
+  const today = new Date().toISOString().split('T')[0];
+
+  bookingBody.innerHTML = `
+    <div class="modal-title">
+      <div>
+        <h2>Оформление тура</h2>
+        <div class="country">${dest.flag} ${dest.city}, ${dest.country} · ${dest.nights} ночей</div>
+      </div>
+      <div class="modal-price">
+        <b>${dest.price.toLocaleString('ru-RU')} ₽</b>
+        <small>за человека</small>
+      </div>
+    </div>
+    <form id="bookingForm" class="form-grid">
+      <label class="form-field"><span>Дата выезда</span>
+        <input type="date" id="bk-date" min="${today}" required>
+      </label>
+      <label class="form-field"><span>Количество туристов</span>
+        <input type="number" id="bk-people" min="1" max="10" value="1" required>
+      </label>
+      <label class="form-field"><span>Имя и фамилия</span>
+        <input type="text" id="bk-name" placeholder="Иван Иванов" required>
+      </label>
+      <label class="form-field"><span>Email</span>
+        <input type="email" id="bk-email" placeholder="you@example.com" required>
+      </label>
+      <label class="form-field" style="grid-column:1/-1;"><span>Телефон</span>
+        <input type="tel" id="bk-phone" placeholder="+7 900 000-00-00" required>
+      </label>
+      <div class="total-box">
+        <span>Итого к оплате</span>
+        <b id="bk-total">${dest.price.toLocaleString('ru-RU')} ₽</b>
+      </div>
+      <button type="submit" class="btn">Подтвердить бронирование</button>
+    </form>
+  `;
+
+  document.getElementById('bk-people').addEventListener('input', updateBookingTotal);
+  document.getElementById('bookingForm').addEventListener('submit', submitBooking);
+
+  bookingOverlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function submitBooking(e){
+  e.preventDefault();
+  const dest = currentBookingDest;
+  const people = Math.max(1, parseInt(document.getElementById('bk-people').value, 10) || 1);
+  const date = document.getElementById('bk-date').value;
+  const name = document.getElementById('bk-name').value.trim();
+  const email = document.getElementById('bk-email').value.trim();
+  const phone = document.getElementById('bk-phone').value.trim();
+  const total = dest.price * people;
+  const code = 'CT-' + Math.random().toString(36).slice(2,8).toUpperCase();
+
+  bookings.push({code, dest, people, date, name, email, phone, total});
+  renderBookings();
+
+  bookingBody.innerHTML = `
+    <div class="success-box">
+      <div class="ico">✅</div>
+      <h2>Бронирование подтверждено!</h2>
+      <p class="modal-desc">${dest.flag} ${dest.city} — мы отправим детали на ${email}</p>
+      <div class="code">${code}</div>
+      <dl>
+        <dt>Направление</dt><dd>${dest.city}, ${dest.country}</dd>
+        <dt>Дата выезда</dt><dd>${date}</dd>
+        <dt>Туристов</dt><dd>${people}</dd>
+        <dt>Имя</dt><dd>${name}</dd>
+        <dt>Итого</dt><dd>${total.toLocaleString('ru-RU')} ₽</dd>
+      </dl>
+      <button class="btn" style="margin-top:20px;" id="bookingDoneBtn">Закрыть</button>
+    </div>
+  `;
+  document.getElementById('bookingDoneBtn').addEventListener('click', closeBooking);
+}
+
+function renderBookings(){
+  const section = document.getElementById('bookingsSection');
+  const list = document.getElementById('bookingList');
+  if (bookings.length === 0) { section.classList.remove('show'); return; }
+  section.classList.add('show');
+  list.innerHTML = bookings.map(b => `
+    <div class="booking-item">
+      <div class="bi-main">
+        <b>${b.dest.flag} ${b.dest.city}, ${b.dest.country}</b>
+        <span>${b.date || 'дата не указана'} · ${b.people} чел. · ${b.name}</span>
+      </div>
+      <div class="bi-code">${b.code}</div>
+      <div style="font-weight:700;">${b.total.toLocaleString('ru-RU')} ₽</div>
+    </div>
+  `).join('');
+}
+
+/* ============================================================
+   КАРТА НАПРАВЛЕНИЙ
+   ============================================================ */
+const markerStore = {};
+
+function markerColor(dest){
+  if (dest.tags.includes('beach')) return '#3f8e96';
+  if (dest.tags.includes('nature')) return '#7c9a3c';
+  return '#f2a640';
+}
+
+function initMap(){
+  const map = L.map('map', { scrollWheelZoom:false }).setView([20, 10], 2);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    maxZoom: 10
+  }).addTo(map);
+
+  DESTINATIONS.forEach(dest => {
+    const marker = L.circleMarker([dest.lat, dest.lon], {
+      radius: 8, weight: 1.5, color: '#15213d',
+      fillColor: markerColor(dest), fillOpacity: 0.85
+    }).addTo(map);
+
+    marker.bindPopup(`
+      <div class="map-popup">
+        <b>${dest.flag} ${dest.city}</b>
+        <span class="mp-meta">${dest.country} · от ${dest.price.toLocaleString('ru-RU')} ₽</span>
+        <span class="mp-meta">${dest.nights} ночей · рейс ${dest.flight}</span>
+        <div class="mp-actions">
+          <button onclick="viewTour('${dest.id}')">Подробнее</button>
+          <button class="primary" onclick="bookTour('${dest.id}')">Купить тур</button>
+        </div>
+      </div>
+    `);
+
+    markerStore[dest.id] = marker;
+  });
+}
+
+window.viewTour = openModal;
+window.bookTour = openBooking;
+
+/* ============================================================
+   ЗАГРУЗКА ПОГОДЫ
+   ============================================================ */
+function loadWeather(){
+  DESTINATIONS.forEach(dest => {
+    fetch(weatherURL(dest.lat, dest.lon))
+      .then(r => r.json())
+      .then(data => {
+        weatherStore[dest.id] = data;
+        updateBoardRow(dest, data);
+        updateBadge(dest, data);
+        applyFilters();
+      })
+      .catch(() => {
+        const row = document.getElementById('board-' + dest.id);
+        if (row) {
+          const status = row.querySelector('.board-status');
+          status.textContent = 'Нет данных';
+          status.className = 'board-status';
+        }
+        const badge = document.getElementById('badge-' + dest.id);
+        if (badge) badge.innerHTML = `<span class="ico">⚠️</span><span class="mono">—</span>`;
+      });
+  });
+}
+
+function updateTimestamp(){
+  const now = new Date();
+  const hh = String(now.getHours()).padStart(2,'0');
+  const mm = String(now.getMinutes()).padStart(2,'0');
+  document.getElementById('board-time').textContent = `ОБНОВЛЕНО ${hh}:${mm}`;
+}
+
+/* ============================================================
+   INIT
+   ============================================================ */
+renderBoardSkeleton();
+renderCatalog();
+updateTimestamp();
+initMap();
+loadWeather();
+applyFilters();
+</script>
+</body>
+</html>
