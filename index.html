@@ -412,7 +412,7 @@
       <div class="hero-stats">
         <div><b>24</b><small>НАПРАВЛЕНИЙ ОНЛАЙН</small></div>
         <div><b>5 ДНЕЙ</b><small>ПРОГНОЗА НА СТРАНИЦЕ ТУРА</small></div>
-        <div><b>10</b><small>ПОГОДА-ФИЛЬТРЫ ПОИСКА</small></div>
+        <div><b>10</b><small>ПОГОДА-ФИЛЬТРОВ ПОИСКА</small></div>
       </div>
     </div>
 
@@ -434,36 +434,6 @@
 </section>
 
 <!-- ================= FEATURES ================= -->
-<section class="features">
-  <div class="wrap">
-    <div class="section-head">
-      <div class="eyebrow">Как мы используем погоду</div>
-      <h2>Три способа спланировать поездку точнее</h2>
-      <p>Мы подключили реальные метеоданные к каждому этапу выбора тура — от каталога до деталей маршрута.</p>
-    </div>
-    <div class="feature-grid">
-      <div class="feature-card">
-        <div class="ico">🌡️</div>
-        <h3>Погода прямо в каталоге</h3>
-        <p>У каждой страны и города — иконка погоды и температура в реальном времени, чтобы не открывать десятки вкладок.</p>
-        <span class="tag">Каталог туров</span>
-      </div>
-      <div class="feature-card">
-        <div class="ico">🔍</div>
-        <h3>Поиск по погодным условиям</h3>
-        <p>Фильтры «тёплая погода», «без дождя», «пляжный отдых» и «не жарче 28°C» сразу сузят список до подходящих направлений.</p>
-        <span class="tag">Форма поиска</span>
-      </div>
-      <div class="feature-card">
-        <div class="ico">🧳</div>
-        <h3>Прогноз и советы по сборам</h3>
-        <p>На странице тура — прогноз на 5 дней: влажность, ветер, вероятность дождя и подсказки, что взять с собой.</p>
-        <span class="tag">Страница тура</span>
-      </div>
-    </div>
-  </div>
-</section>
-
 <!-- ================= SEARCH ================= -->
 <section class="search" id="search">
   <div class="wrap">
@@ -558,6 +528,37 @@
   </div>
 </section>
 
+<!-- ================= HOW WE USE WEATHER ================= -->
+<section class="features" style="background:var(--paper);border-top:1px solid var(--line);">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">Как мы используем погоду</div>
+      <h2>Три способа спланировать поездку точнее</h2>
+      <p>Мы подключили реальные метеоданные к каждому этапу выбора тура — от каталога до деталей маршрута.</p>
+    </div>
+    <div class="feature-grid">
+      <div class="feature-card">
+        <div class="ico">🌡️</div>
+        <h3>Погода прямо в каталоге</h3>
+        <p>У каждой страны и города — иконка погоды и температура в реальном времени, чтобы не открывать десятки вкладок.</p>
+        <span class="tag">Каталог туров</span>
+      </div>
+      <div class="feature-card">
+        <div class="ico">🔍</div>
+        <h3>Поиск по погодным условиям</h3>
+        <p>Фильтры «тёплая погода», «без дождя», «пляжный отдых» и «не жарче 28°C» сразу сузят список до подходящих направлений.</p>
+        <span class="tag">Форма поиска</span>
+      </div>
+      <div class="feature-card">
+        <div class="ico">🧳</div>
+        <h3>Прогноз и советы по сборам</h3>
+        <p>На странице тура — прогноз на 5 дней: влажность, ветер, вероятность дождя и подсказки, что взять с собой.</p>
+        <span class="tag">Страница тура</span>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- ================= MY BOOKINGS ================= -->
 <section class="bookings-section" id="bookingsSection">
   <div class="wrap">
@@ -603,76 +604,76 @@
    ============================================================ */
 const DESTINATIONS = [
   {id:'paris', flight:'MT-101', city:'Париж', country:'Франция', flag:'🇫🇷', lat:48.8566, lon:2.3522,
-   tags:['city','excursion'], price:52000, nights:5, img:'https://picsum.photos/seed/paris-tour/640/420',
+   tags:['city','excursion'], price:52000, nights:5, img:'https://s.yimg.com/ny/api/res/1.2/7nMPYsfQxw.apyGN60QL8Q--/YXBwaWQ9aGlnaGxhbmRlcjt3PTEyNDI7aD04Mjg7Y2Y9d2VicA--/https://media.zenfs.com/en/the_independent_577/cbd1c6f8745c4491048a4ba10b1044d0',
    desc:'Город света: Эйфелева башня, Лувр и круассаны на каждом углу.'},
   {id:'rome', flight:'MT-108', city:'Рим', country:'Италия', flag:'🇮🇹', lat:41.9028, lon:12.4964,
-   tags:['city','excursion','history'], price:48000, nights:5, img:'https://picsum.photos/seed/rome-tour/640/420',
+   tags:['city','excursion','history'], price:48000, nights:5, img:'https://avatars.mds.yandex.net/i?id=1b8cd98fecef42de9f135f2a0bec3b46_l-6475641-images-thumbs&n=13',
    desc:'Колизей, фонтаны и паста аль денте — вечный город ждёт.'},
   {id:'barcelona', flight:'MT-115', city:'Барселона', country:'Испания', flag:'🇪🇸', lat:41.3851, lon:2.1734,
-   tags:['beach','city','excursion'], price:56000, nights:6, img:'https://picsum.photos/seed/barcelona-tour/640/420',
+   tags:['beach','city','excursion'], price:56000, nights:6, img:'https://avatars.mds.yandex.net/i?id=6d3f78fa33aad6432195f2cd117c4bfc26a637d4-5177089-images-thumbs&n=13',
    desc:'Архитектура Гауди и пляжи Средиземного моря в одном городе.'},
   {id:'dubai', flight:'MT-204', city:'Дубай', country:'ОАЭ', flag:'🇦🇪', lat:25.2048, lon:55.2708,
-   tags:['beach','shopping'], price:89000, nights:7, img:'https://picsum.photos/seed/dubai-tour/640/420',
+   tags:['beach','shopping'], price:89000, nights:7, img:'https://contenu.nyc3.digitaloceanspaces.com/journalist/1ad55d32-8270-48fe-903f-a90b660ecc5c/thumbnail.jpeg',
    desc:'Небоскрёбы, пустыня на джипах и пляжи Персидского залива.'},
   {id:'bali', flight:'MT-318', city:'Бали', country:'Индонезия', flag:'🇮🇩', lat:-8.6500, lon:115.2167,
-   tags:['beach','nature'], price:99000, nights:8, img:'https://picsum.photos/seed/bali-tour/640/420',
+   tags:['beach','nature'], price:99000, nights:8, img:'https://avatars.mds.yandex.net/i?id=690b631b1561d12803757142c95273f92f72a643-12685009-images-thumbs&n=13',
    desc:'Рисовые террасы, храмы и океан — остров богов.'},
   {id:'phuket', flight:'MT-322', city:'Пхукет', country:'Таиланд', flag:'🇹🇭', lat:7.8804, lon:98.3923,
-   tags:['beach'], price:78000, nights:9, img:'https://picsum.photos/seed/phuket-tour/640/420',
+   tags:['beach'], price:78000, nights:9, img:'https://avatars.mds.yandex.net/i?id=66a49d1947ade75b751ad4744c4e794a2bd4a709-16493921-images-thumbs&n=13',
    desc:'Тёплое море, белый песок и тайская кухня день и ночь.'},
   {id:'sharm', flight:'MT-130', city:'Шарм-эль-Шейх', country:'Египет', flag:'🇪🇬', lat:27.9158, lon:34.3300,
-   tags:['beach','diving'], price:65000, nights:7, img:'https://picsum.photos/seed/sharm-tour/640/420',
+   tags:['beach','diving'], price:65000, nights:7, img:'https://avatars.mds.yandex.net/i?id=eab4b318d5c4c8b6191eddcb53939d4edc1e8d9f-4437628-images-thumbs&n=13',
    desc:'Коралловые рифы Красного моря и солнце круглый год.'},
   {id:'santorini', flight:'MT-142', city:'Санторини', country:'Греция', flag:'🇬🇷', lat:36.3932, lon:25.4615,
-   tags:['beach','romance','excursion'], price:92000, nights:6, img:'https://picsum.photos/seed/santorini-tour/640/420',
+   tags:['beach','romance','excursion'], price:92000, nights:6, img:'https://avatars.mds.yandex.net/i?id=30e0df94b79099079d88861fcccea7a70ab71271-7464698-images-thumbs&n=13',
    desc:'Белые домики, синие купола и закаты над вулканом.'},
   {id:'antalya', flight:'MT-150', city:'Анталья', country:'Турция', flag:'🇹🇷', lat:36.8969, lon:30.7133,
-   tags:['beach'], price:58000, nights:7, img:'https://picsum.photos/seed/antalya-tour/640/420',
+   tags:['beach'], price:58000, nights:7, img:'https://avatars.mds.yandex.net/i?id=b3f0ab5e9b11efd99cd46cd2688623bd9ffc5a82-10242421-images-thumbs&n=13',
    desc:'Всё включено, тёплое море и горы Тавр на горизонте.'},
   {id:'reykjavik', flight:'MT-407', city:'Рейкьявик', country:'Исландия', flag:'🇮🇸', lat:64.1466, lon:-21.9426,
-   tags:['nature','excursion'], price:110000, nights:5, img:'https://picsum.photos/seed/reykjavik-tour/640/420',
+   tags:['nature','excursion'], price:110000, nights:5, img:'https://avatars.mds.yandex.net/i?id=55318fca456e277b6d6d686545ecf76a_l-9755596-images-thumbs&n=13',
    desc:'Гейзеры, водопады и охота за северным сиянием.'},
   {id:'tokyo', flight:'MT-512', city:'Токио', country:'Япония', flag:'🇯🇵', lat:35.6762, lon:139.6503,
-   tags:['city','excursion'], price:105000, nights:7, img:'https://picsum.photos/seed/tokyo-tour/640/420',
+   tags:['city','excursion'], price:105000, nights:7, img:'https://avatars.mds.yandex.net/i?id=be72925a47cde9a87e75e8a7c2fa3aba87ec377a-4452382-images-thumbs&n=13',
    desc:'Неон, храмы и лучшая еда в мире в одном мегаполисе.'},
   {id:'maldives', flight:'MT-330', city:'Мале (Мальдивы)', country:'Мальдивы', flag:'🇲🇻', lat:4.1755, lon:73.5093,
-   tags:['beach','luxury'], price:145000, nights:7, img:'https://picsum.photos/seed/maldives-tour/640/420',
+   tags:['beach','luxury'], price:145000, nights:7, img:'https://avatars.mds.yandex.net/i?id=3eaf3b0421b104af85e7a3606a585a5ea2e99a20-4854982-images-thumbs&n=13',
    desc:'Бунгало над водой и бирюзовая лагуна вокруг.'},
   {id:'vienna', flight:'MT-160', city:'Вена', country:'Австрия', flag:'🇦🇹', lat:48.2082, lon:16.3738,
-   tags:['city','excursion','history'], price:61000, nights:5, img:'https://picsum.photos/seed/vienna-tour/640/420',
+   tags:['city','excursion','history'], price:61000, nights:5, img:'https://avatars.mds.yandex.net/i?id=9da69cff86f706ac453de63bcdbfa53ae8452ee7-5886792-images-thumbs&n=13',
    desc:'Дворцы Габсбургов, опера и кофейни со штруделем.'},
   {id:'prague', flight:'MT-167', city:'Прага', country:'Чехия', flag:'🇨🇿', lat:50.0755, lon:14.4378,
-   tags:['city','excursion','history'], price:46000, nights:5, img:'https://picsum.photos/seed/prague-tour/640/420',
+   tags:['city','excursion','history'], price:46000, nights:5, img:'https://avatars.mds.yandex.net/i?id=c751a176cdfd47e1699897b1b9d2d863cd264270-5235524-images-thumbs&n=13',
    desc:'Карлов мост, Пражский град и пиво в каждом дворике.'},
   {id:'lisbon', flight:'MT-173', city:'Лиссабон', country:'Португалия', flag:'🇵🇹', lat:38.7223, lon:-9.1393,
-   tags:['city','beach','excursion'], price:57000, nights:6, img:'https://picsum.photos/seed/lisbon-tour/640/420',
+   tags:['city','beach','excursion'], price:57000, nights:6, img:'https://avatars.mds.yandex.net/i?id=a6a8c19fbb20bc6e602c7b6f7b48c440_l-5656941-images-thumbs&n=13',
    desc:'Трамваи, фаду и побережье Атлантики рядом.'},
   {id:'amsterdam', flight:'MT-181', city:'Амстердам', country:'Нидерланды', flag:'🇳🇱', lat:52.3676, lon:4.9041,
-   tags:['city','excursion'], price:63000, nights:4, img:'https://picsum.photos/seed/amsterdam-tour/640/420',
+   tags:['city','excursion'], price:63000, nights:4, img:'https://avatars.mds.yandex.net/i?id=cad764b68b556f7c0495df5151dca790_l-8000733-images-thumbs&n=13',
    desc:'Каналы, музеи и велосипеды на каждом углу.'},
   {id:'istanbul', flight:'MT-190', city:'Стамбул', country:'Турция', flag:'🇹🇷', lat:41.0082, lon:28.9784,
-   tags:['city','excursion','history'], price:49000, nights:6, img:'https://picsum.photos/seed/istanbul-tour/640/420',
+   tags:['city','excursion','history'], price:49000, nights:6, img:'https://avatars.mds.yandex.net/i?id=a0e36464a8554c72f9a24440ac17e781_l-12884996-images-thumbs&n=13',
    desc:'Босфор, базары и смешение Европы и Азии.'},
   {id:'marrakech', flight:'MT-205', city:'Марракеш', country:'Марокко', flag:'🇲🇦', lat:31.6295, lon:-7.9811,
-   tags:['city','excursion'], price:54000, nights:6, img:'https://picsum.photos/seed/marrakech-tour/640/420',
+   tags:['city','excursion'], price:54000, nights:6, img:'https://avatars.mds.yandex.net/i?id=0bff7953a514628d785ddf54fa1b4a34921b2ea5-4482581-images-thumbs&n=13',
    desc:'Медина, специи и атмосфера тысячи и одной ночи.'},
   {id:'capetown', flight:'MT-410', city:'Кейптаун', country:'ЮАР', flag:'🇿🇦', lat:-33.9249, lon:18.4241,
-   tags:['nature','beach','excursion'], price:120000, nights:8, img:'https://picsum.photos/seed/capetown-tour/640/420',
+   tags:['nature','beach','excursion'], price:120000, nights:8, img:'https://avatars.mds.yandex.net/i?id=aa919b097d18f6cea5e959e2a415315c84636a4c-5253253-images-thumbs&n=13',
    desc:'Столовая гора, океан и винодельни в окрестностях.'},
   {id:'zanzibar', flight:'MT-345', city:'Занзибар', country:'Танзания', flag:'🇹🇿', lat:-6.1659, lon:39.2026,
-   tags:['beach'], price:108000, nights:8, img:'https://picsum.photos/seed/zanzibar-tour/640/420',
+   tags:['beach'], price:108000, nights:8, img:'https://avatars.mds.yandex.net/i?id=03c26f145b24cf3fea30ac48f10e9311a406b9d3-4790390-images-thumbs&n=13',
    desc:'Белоснежные пляжи и специи Индийского океана.'},
   {id:'cancun', flight:'MT-360', city:'Канкун', country:'Мексика', flag:'🇲🇽', lat:21.1619, lon:-86.8515,
-   tags:['beach','luxury'], price:132000, nights:7, img:'https://picsum.photos/seed/cancun-tour/640/420',
+   tags:['beach','luxury'], price:132000, nights:7, img:'https://avatars.mds.yandex.net/i?id=229404a880652c79a179570ed544976a691b668d-5480663-images-thumbs&n=13',
    desc:'Карибское море, сенотес и руины майя рядом.'},
   {id:'sydney', flight:'MT-520', city:'Сидней', country:'Австралия', flag:'🇦🇺', lat:-33.8688, lon:151.2093,
-   tags:['city','beach','excursion'], price:140000, nights:9, img:'https://picsum.photos/seed/sydney-tour/640/420',
+   tags:['city','beach','excursion'], price:140000, nights:9, img:'https://avatars.mds.yandex.net/i?id=440fd8280bf7ef0a6e4a345ddba5d48233b54015-11026079-images-thumbs&n=13',
    desc:'Опера, пляж Бонди и энергия большого города.'},
   {id:'goa', flight:'MT-335', city:'Гоа', country:'Индия', flag:'🇮🇳', lat:15.2993, lon:74.1240,
-   tags:['beach','nature'], price:74000, nights:9, img:'https://picsum.photos/seed/goa-tour/640/420',
+   tags:['beach','nature'], price:74000, nights:9, img:'https://avatars.mds.yandex.net/i?id=c2ffd6704e5e892ba725dd5f3c663f302a0ac77e-5217977-images-thumbs&n=13',
    desc:'Пляжи, специи и расслабленная атмосфера побережья.'},
   {id:'newyork', flight:'MT-601', city:'Нью-Йорк', country:'США', flag:'🇺🇸', lat:40.7128, lon:-74.0060,
-   tags:['city','excursion','shopping'], price:118000, nights:6, img:'https://picsum.photos/seed/newyork-tour/640/420',
+   tags:['city','excursion','shopping'], price:118000, nights:6, img:'https://avatars.mds.yandex.net/i?id=bf4a33bac99e237c259a199d3854b10e8a9b49d1-5823103-images-thumbs&n=13',
    desc:'Бродвей, небоскрёбы и энергия мегаполиса.'},
 ];
 
@@ -704,8 +705,8 @@ function weatherInfo(code){
 
 function weatherURL(lat, lon){
   return `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}` +
-         `&current_weather=true&hourly=relative_humidity_2m` +
-         `&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_probability_max,windspeed_10m_max` +
+         `&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code,precipitation_probability` +
+         `&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,wind_speed_10m_max` +
          `&timezone=auto&forecast_days=5`;
 }
 
@@ -715,34 +716,36 @@ const weatherStore = {}; // id -> open-meteo response
    РЕКОМЕНДАЦИИ
    ============================================================ */
 function shortAdvice(dest, data){
-  const cw = data.current_weather;
-  const rainSoon = RAIN_CODES.has(cw.weathercode) || data.daily.precipitation_probability_max[0] >= 50;
+  const cw = data.current;
+  const rainSoon = RAIN_CODES.has(cw.weather_code) || data.daily.precipitation_probability_max[0] >= 50;
   if (rainSoon) return {text:'Возьмите зонт ☔', cls:'rain'};
-  if (cw.temperature <= 10) return {text:'Нужна тёплая куртка 🧥', cls:'cold'};
-  if (cw.temperature >= 30) return {text:'Жара — пейте воду 💧', cls:'hot'};
-  if (dest.tags.includes('beach') && cw.temperature >= 24) return {text:'Идеально для пляжа 🏖️', cls:''};
+  if (cw.temperature_2m <= 10) return {text:'Нужна тёплая куртка 🧥', cls:'cold'};
+  if (cw.temperature_2m >= 30) return {text:'Жара — пейте воду 💧', cls:'hot'};
+  if (dest.tags.includes('beach') && cw.temperature_2m >= 24) return {text:'Идеально для пляжа 🏖️', cls:''};
   if (dest.tags.includes('excursion') || dest.tags.includes('city')) return {text:'Удобная обувь для прогулок 👟', cls:''};
   return {text:'Комфортная погода 👍', cls:''};
 }
 
 function packingTips(dest, data){
-  const cw = data.current_weather;
+  const cw = data.current;
+  const temp = cw.temperature_2m;
+  const wind = cw.wind_speed_10m;
   const daily = data.daily;
   const maxRain = Math.max(...daily.precipitation_probability_max.slice(0,5));
   const tips = [];
 
-  if (cw.temperature <= 10) tips.push('🧥 Возьмите тёплую куртку — вечера и утро прохладные.');
-  else if (cw.temperature <= 16) tips.push('🧥 Пригодится лёгкая куртка или свитер для вечера.');
-  else if (cw.temperature >= 29) tips.push('🧴 Солнцезащитный крем, головной убор и лёгкая одежда — будет жарко.');
+  if (temp <= 10) tips.push('🧥 Возьмите тёплую куртку — вечера и утро прохладные.');
+  else if (temp <= 16) tips.push('🧥 Пригодится лёгкая куртка или свитер для вечера.');
+  else if (temp >= 29) tips.push('🧴 Солнцезащитный крем, головной убор и лёгкая одежда — будет жарко.');
   else tips.push('👕 Лёгкая повседневная одежда подойдёт для большей части поездки.');
 
   if (maxRain >= 50) tips.push('☔ В ближайшие дни вероятен дождь — возьмите зонт или дождевик.');
   else tips.push('🌂 Дождь по прогнозу не ожидается — можно обойтись без зонта.');
 
-  if (cw.windspeed >= 25) tips.push('💨 Ожидается ветер — пригодится ветровка или плотная куртка.');
+  if (wind >= 25) tips.push('💨 Ожидается ветер — пригодится ветровка или плотная куртка.');
 
   if (dest.tags.includes('beach')) {
-    if (cw.temperature >= 23 && maxRain < 50) tips.push('🏖️ Погода отлично подходит для пляжного отдыха.');
+    if (temp >= 23 && maxRain < 50) tips.push('🏖️ Погода отлично подходит для пляжного отдыха.');
     else tips.push('🏖️ Для пляжа условия так себе — лучше запланировать экскурсии или спа.');
   }
   if (dest.tags.includes('excursion') || dest.tags.includes('city')) {
@@ -777,12 +780,12 @@ function renderBoardSkeleton(){
 function updateBoardRow(dest, data){
   const row = document.getElementById('board-' + dest.id);
   if (!row) return;
-  const cw = data.current_weather;
-  const [ico, label] = weatherInfo(cw.weathercode);
+  const cw = data.current;
+  const [ico, label] = weatherInfo(cw.weather_code);
   const advice = shortAdvice(dest, data);
   row.querySelector('.board-weather').innerHTML =
-    `<span class="ico">${ico}</span><span class="temp mono">${Math.round(cw.temperature)}°C</span><span class="lbl">${label}</span>`;
-  row.querySelector('.board-wind').textContent = `${Math.round(cw.windspeed)} км/ч`;
+    `<span class="ico">${ico}</span><span class="temp mono">${Math.round(cw.temperature_2m)}°C</span><span class="lbl">${label}</span>`;
+  row.querySelector('.board-wind').textContent = `${Math.round(cw.wind_speed_10m)} км/ч`;
   const status = row.querySelector('.board-status');
   status.textContent = advice.text;
   status.className = 'board-status ' + advice.cls;
@@ -828,9 +831,9 @@ function renderCatalog(){
 function updateBadge(dest, data){
   const badge = document.getElementById('badge-' + dest.id);
   if (!badge) return;
-  const cw = data.current_weather;
-  const [ico] = weatherInfo(cw.weathercode);
-  badge.innerHTML = `<span class="ico">${ico}</span><span class="mono">${Math.round(cw.temperature)}°C</span>`;
+  const cw = data.current;
+  const [ico] = weatherInfo(cw.weather_code);
+  badge.innerHTML = `<span class="ico">${ico}</span><span class="mono">${Math.round(cw.temperature_2m)}°C</span>`;
 }
 
 /* ============================================================
@@ -876,15 +879,15 @@ function passesFilters(dest){
   const data = weatherStore[dest.id];
   if (!data) return !(anyWeatherFilterActive());
 
-  const cw = data.current_weather;
+  const cw = data.current;
   const maxRain = Math.max(...data.daily.precipitation_probability_max.slice(0,3));
-  const rainy   = RAIN_CODES.has(cw.weathercode) || maxRain >= 40;
-  const clearCode = [0,1,2,3].includes(cw.weathercode);
+  const rainy   = RAIN_CODES.has(cw.weather_code) || maxRain >= 40;
+  const clearCode = [0,1,2,3].includes(cw.weather_code);
 
-  if (filterEls.warm.checked   && cw.temperature < 22) return false;
-  if (filterEls.norain.checked && rainy)               return false;
-  if (filterEls.max28.checked  && cw.temperature > 28) return false;
-  if (filterEls.sunny.checked  && !clearCode)          return false;
+  if (filterEls.warm.checked   && cw.temperature_2m < 22) return false;
+  if (filterEls.norain.checked && rainy)                   return false;
+  if (filterEls.max28.checked  && cw.temperature_2m > 28) return false;
+  if (filterEls.sunny && filterEls.sunny.checked && !clearCode) return false;
   return true;
 }
 
@@ -964,9 +967,7 @@ const modalBody = document.getElementById('modalBody');
 const WEEKDAY_FMT = new Intl.DateTimeFormat('ru-RU', { weekday: 'short' });
 
 function findHumidity(data){
-  const idx = data.hourly.time.indexOf(data.current_weather.time);
-  const i = idx >= 0 ? idx : 0;
-  return data.hourly.relative_humidity_2m[i];
+  return data.current.relative_humidity_2m ?? '—';
 }
 
 function openModal(id){
@@ -981,12 +982,12 @@ function openModal(id){
       <p class="modal-desc">Данные о погоде ещё загружаются, попробуйте открыть тур чуть позже.</p>
       <button class="btn" style="width:100%;margin-top:10px;padding:14px;font-size:1rem;" data-book="${dest.id}" id="modalBookBtn">Забронировать этот тур →</button>`;
   } else {
-    const cw = data.current_weather;
-    const [ico, label] = weatherInfo(cw.weathercode);
+    const cw = data.current;
+    const [ico, label] = weatherInfo(cw.weather_code);
     const humidity = findHumidity(data);
 
     const forecastHtml = data.daily.time.map((date, i) => {
-      const [fIco] = weatherInfo(data.daily.weathercode[i]);
+      const [fIco] = weatherInfo(data.daily.weather_code[i]);
       const d = new Date(date + 'T00:00:00');
       const day = i === 0 ? 'Сегодня' : WEEKDAY_FMT.format(d);
       return `
@@ -1016,10 +1017,10 @@ function openModal(id){
       <div class="now-weather">
         <div class="ico">${ico}</div>
         <div>
-          <div class="temp">${Math.round(cw.temperature)}°C · ${label}</div>
+          <div class="temp">${Math.round(cw.temperature_2m)}°C · ${label}</div>
           <div class="meta">
             <span>💧 Влажность: ${humidity}%</span>
-            <span>💨 Ветер: ${Math.round(cw.windspeed)} км/ч</span>
+            <span>💨 Ветер: ${Math.round(cw.wind_speed_10m)} км/ч</span>
             <span>🌧️ Вероятность дождя сегодня: ${data.daily.precipitation_probability_max[0]}%</span>
           </div>
         </div>
@@ -1255,4 +1256,4 @@ loadWeather();
 applyFilters();
 </script>
 </body>
-</html>
+</html>   
