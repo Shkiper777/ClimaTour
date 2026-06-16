@@ -173,6 +173,35 @@
   .search-meta{font-family:'JetBrains Mono',monospace;font-size:.78rem;color:#aab2cb;}
   .search-meta b{color:var(--amber);}
 
+  /* ===== FILTER ACTION BUTTONS ===== */
+  .search-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:4px;}
+  .btn-apply{
+    background:var(--amber);color:var(--navy);border:none;border-radius:999px;
+    padding:12px 28px;font-size:.92rem;font-weight:700;cursor:pointer;
+    font-family:'Inter',sans-serif;transition:.2s;
+  }
+  .btn-apply:hover{background:#e09428;}
+  .btn-clear{
+    background:transparent;color:#aab2cb;border:1.5px solid rgba(255,255,255,.2);
+    border-radius:999px;padding:12px 24px;font-size:.92rem;font-weight:600;cursor:pointer;
+    font-family:'Inter',sans-serif;transition:.2s;
+  }
+  .btn-clear:hover{border-color:#aab2cb;color:#fff;}
+  .filter-label{
+    display:block;font-family:'JetBrains Mono',monospace;font-size:.68rem;
+    letter-spacing:.12em;text-transform:uppercase;color:#9aa4c2;margin-bottom:6px;
+  }
+  .search-divider{border:none;border-top:1px solid rgba(255,255,255,.08);margin:4px 0;}
+  .range-wrap{display:flex;align-items:center;gap:12px;}
+  .range-wrap input[type=range]{
+    flex:1;accent-color:var(--amber);height:4px;cursor:pointer;
+  }
+  .range-val{
+    font-family:'JetBrains Mono',monospace;color:var(--amber);font-size:.9rem;
+    font-weight:700;white-space:nowrap;min-width:70px;text-align:right;
+  }
+  .filter-row-label{font-family:'JetBrains Mono',monospace;font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:#9aa4c2;width:100%;}
+
   /* ===== CATALOG ===== */
   .catalog{padding:72px 0;}
   .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:24px;}
@@ -382,8 +411,8 @@
       </div>
       <div class="hero-stats">
         <div><b>24</b><small>НАПРАВЛЕНИЙ ОНЛАЙН</small></div>
-        <div><b>5 ДНЕЙ</b><small>ПРОГНОЗ НА СТРАНИЦЕ ТУРА</small></div>
-        <div><b>4</b><small>WEATHER-ФИЛЬТРА ПОИСКА</small></div>
+        <div><b>5 ДНЕЙ</b><small>ПРОГНОЗА НА СТРАНИЦЕ ТУРА</small></div>
+        <div><b>10</b><small>ПОГОДА-ФИЛЬТРЫ ПОИСКА</small></div>
       </div>
     </div>
 
@@ -447,13 +476,37 @@
       <div class="search-row">
         <input type="text" class="search-input" id="searchText" placeholder="Город или страна, например «Бали»…">
       </div>
+      <hr class="search-divider">
       <div class="search-row">
-        <label class="chip" data-filter="warm"><input type="checkbox" id="f-warm"> ☀️ Хочу тёплую погоду (от +22°C)</label>
+        <span class="filter-row-label">🌡️ Климат и осадки</span>
+        <label class="chip" data-filter="warm"><input type="checkbox" id="f-warm"> ☀️ Тёплая погода (от +22°C)</label>
         <label class="chip" data-filter="norain"><input type="checkbox" id="f-norain"> 🌂 Без дождя</label>
-        <label class="chip" data-filter="beach"><input type="checkbox" id="f-beach"> 🏖️ Пляжный отдых</label>
         <label class="chip" data-filter="max28"><input type="checkbox" id="f-max28"> 🌤️ Не жарче +28°C</label>
+        <label class="chip" data-filter="sunny"><input type="checkbox" id="f-sunny"> ⛅ Только ясно/облачно</label>
       </div>
-      <div class="search-meta" id="search-meta">Загружаем данные о погоде по всем направлениям…</div>
+      <div class="search-row">
+        <span class="filter-row-label">🎯 Тип отдыха</span>
+        <label class="chip" data-filter="beach"><input type="checkbox" id="f-beach"> 🏖️ Пляжный отдых</label>
+        <label class="chip" data-filter="city"><input type="checkbox" id="f-city"> 🏙️ Городские экскурсии</label>
+        <label class="chip" data-filter="nature"><input type="checkbox" id="f-nature"> 🌿 Природа</label>
+        <label class="chip" data-filter="luxury"><input type="checkbox" id="f-luxury"> 💎 Премиум-туры</label>
+      </div>
+      <div>
+        <span class="filter-label">💰 Максимальный бюджет — <span id="budgetLabel">150 000 ₽</span></span>
+        <div class="range-wrap">
+          <span style="font-family:'JetBrains Mono',monospace;font-size:.8rem;color:#9aa4c2;">40К</span>
+          <input type="range" id="f-budget" min="40000" max="150000" step="5000" value="150000">
+          <span style="font-family:'JetBrains Mono',monospace;font-size:.8rem;color:#9aa4c2;">150К</span>
+        </div>
+      </div>
+      <hr class="search-divider">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;">
+        <div class="search-meta" id="search-meta">Загружаем данные о погоде по всем направлениям…</div>
+        <div class="search-actions">
+          <button class="btn-clear" id="btnClear">✕ Очистить</button>
+          <button class="btn-apply" id="btnApply">Применить фильтры ↓</button>
+        </div>
+      </div>
     </div>
   </div>
 </section>
@@ -784,31 +837,54 @@ function updateBadge(dest, data){
    ФИЛЬТРЫ ПОИСКА
    ============================================================ */
 const searchText = document.getElementById('searchText');
-const filterIds = ['warm','norain','beach','max28'];
+const filterIds = ['warm','norain','beach','max28','sunny','city','nature','luxury'];
 const filterEls = {};
 filterIds.forEach(id => filterEls[id] = document.getElementById('f-' + id));
 
+const budgetSlider = document.getElementById('f-budget');
+const budgetLabel  = document.getElementById('budgetLabel');
+budgetSlider.addEventListener('input', () => {
+  const v = parseInt(budgetSlider.value, 10);
+  budgetLabel.textContent = (v / 1000).toFixed(0) + ' 000 ₽';
+});
+
 function anyWeatherFilterActive(){
-  return filterEls.warm.checked || filterEls.norain.checked || filterEls.max28.checked;
+  return filterEls.warm.checked || filterEls.norain.checked ||
+         filterEls.max28.checked || filterEls.sunny.checked;
+}
+
+function anyTagFilterActive(){
+  return filterEls.beach.checked || filterEls.city.checked ||
+         filterEls.nature.checked || filterEls.luxury.checked;
 }
 
 function passesFilters(dest){
   const text = searchText.value.trim().toLowerCase();
-  if (text && !(dest.city.toLowerCase().includes(text) || dest.country.toLowerCase().includes(text))) {
-    return false;
-  }
-  if (filterEls.beach.checked && !dest.tags.includes('beach')) return false;
+  if (text && !(dest.city.toLowerCase().includes(text) || dest.country.toLowerCase().includes(text))) return false;
+
+  // Budget filter (always active)
+  const maxBudget = parseInt(budgetSlider.value, 10);
+  if (dest.price > maxBudget) return false;
+
+  // Tag / activity filters
+  if (filterEls.beach.checked   && !dest.tags.includes('beach'))     return false;
+  if (filterEls.city.checked    && !dest.tags.includes('city') &&
+      !dest.tags.includes('excursion'))                               return false;
+  if (filterEls.nature.checked  && !dest.tags.includes('nature'))    return false;
+  if (filterEls.luxury.checked  && !dest.tags.includes('luxury'))    return false;
 
   const data = weatherStore[dest.id];
-  if (!data) return !anyWeatherFilterActive();
+  if (!data) return !(anyWeatherFilterActive());
 
   const cw = data.current_weather;
   const maxRain = Math.max(...data.daily.precipitation_probability_max.slice(0,3));
-  const rainy = RAIN_CODES.has(cw.weathercode) || maxRain >= 40;
+  const rainy   = RAIN_CODES.has(cw.weathercode) || maxRain >= 40;
+  const clearCode = [0,1,2,3].includes(cw.weathercode);
 
-  if (filterEls.warm.checked && cw.temperature < 22) return false;
-  if (filterEls.norain.checked && rainy) return false;
-  if (filterEls.max28.checked && cw.temperature > 28) return false;
+  if (filterEls.warm.checked   && cw.temperature < 22) return false;
+  if (filterEls.norain.checked && rainy)               return false;
+  if (filterEls.max28.checked  && cw.temperature > 28) return false;
+  if (filterEls.sunny.checked  && !clearCode)          return false;
   return true;
 }
 
@@ -849,14 +925,33 @@ function applyFilters(){
   }
 }
 
-[searchText, ...filterIds.map(id => filterEls[id])].forEach(el => {
-  el.addEventListener('input', () => {
-    filterIds.forEach(id => {
-      const chip = filterEls[id].closest('.chip');
-      chip.classList.toggle('active', filterEls[id].checked);
-    });
-    applyFilters();
+// Sync chip active state and live-preview on change (no catalog scroll)
+function syncChips(){
+  filterIds.forEach(id => {
+    const chip = filterEls[id].closest('.chip');
+    if (chip) chip.classList.toggle('active', filterEls[id].checked);
   });
+}
+
+[searchText, ...filterIds.map(id => filterEls[id])].forEach(el => {
+  el.addEventListener('input', () => { syncChips(); });
+});
+
+// Apply button: run filters and scroll to catalog
+document.getElementById('btnApply').addEventListener('click', () => {
+  syncChips();
+  applyFilters();
+  document.getElementById('catalog').scrollIntoView({ behavior: 'smooth' });
+});
+
+// Clear button: reset all inputs and re-run filters
+document.getElementById('btnClear').addEventListener('click', () => {
+  searchText.value = '';
+  filterIds.forEach(id => { filterEls[id].checked = false; });
+  budgetSlider.value = budgetSlider.max;
+  budgetLabel.textContent = '150 000 ₽';
+  syncChips();
+  applyFilters();
 });
 
 /* ============================================================
