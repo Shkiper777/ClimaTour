@@ -1,0 +1,1 @@
+Open-Meteo integration skeleton added. Manual project wiring required.
