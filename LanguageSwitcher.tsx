@@ -1,69 +1,76 @@
 "use client";
 
-import Image from "next/image";
-import Link from "next/link";
-import { formatCurrency, getDictionary, scenarioLabels } from "@/lib/i18n/dictionaries";
-import { buildWeatherRecommendation } from "@/lib/weather/recommendation";
-import { mockWeatherByDestination } from "@/data/mockWeather";
-import { getTourCopy } from "@/data/mockTours";
-import { WeatherBadge } from "@/components/WeatherBadge";
-import type { Locale, Tour, TravelScenario } from "@/types/travel";
+import { useState } from "react";
+import { getDictionary } from "@/lib/i18n/dictionaries";
+import type { Locale } from "@/types/travel";
 
-interface TourCardProps {
-  tour: Tour;
+interface LeadFormProps {
+  tourId: string;
   locale: Locale;
-  scenario: TravelScenario;
-  selected: boolean;
-  onToggleCompare: (tourId: string) => void;
 }
 
-export function TourCard({ tour, locale, scenario, selected, onToggleCompare }: TourCardProps) {
+type SubmitState = "idle" | "sending" | "sent" | "error" | "invalid";
+
+export function LeadForm({ tourId, locale }: LeadFormProps) {
   const dict = getDictionary(locale);
-  const weather = mockWeatherByDestination[tour.destinationId];
-  const recommendation = buildWeatherRecommendation(scenario, weather.forecast, locale);
-  const copy = getTourCopy(tour, locale);
+  const [submitState, setSubmitState] = useState<SubmitState>("idle");
+  const [consent, setConsent] = useState(false);
+
+  async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const form = new FormData(event.currentTarget);
+    const payload = {
+      tourId,
+      locale,
+      name: String(form.get("name") ?? "").trim(),
+      phone: String(form.get("phone") ?? "").trim(),
+      email: String(form.get("email") ?? "").trim()
+    };
+
+    if (!payload.name || !payload.phone || !payload.email || !consent) {
+      setSubmitState("invalid");
+      return;
+    }
+
+    setSubmitState("sending");
+
+    const response = await fetch("/api/leads", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    setSubmitState(response.ok ? "sent" : "error");
+  }
 
   return (
-    <article className="tour-card">
-      <Image alt={`${copy.city} ${copy.hotelName}`} height={420} src={tour.image} width={760} />
-      <div className="tour-card-body">
-        <div className="tour-card-heading">
-          <div>
-            <span className="eyebrow">
-              {copy.country} / {copy.city}
-            </span>
-            <h3>{copy.title}</h3>
-          </div>
-          <strong>{formatCurrency(tour.price, locale)}</strong>
-        </div>
-        <p>{copy.description}</p>
-        <div className="meta-row">
-          <span>{tour.duration} {dict.nights}</span>
-          <span>{copy.hotelName}</span>
-          <span>{scenarioLabels[locale][scenario]}</span>
-        </div>
-        <div className="card-weather-row">
-          <WeatherBadge
-            condition={weather.current.condition}
-            locale={locale}
-            status={recommendation.status}
-            temperature={weather.current.temperature}
-          />
-          <span className={`fit-pill ${recommendation.status}`}>{recommendation.summary}</span>
-        </div>
-        <div className="card-actions">
-          <button
-            className={selected ? "secondary-button active" : "secondary-button"}
-            onClick={() => onToggleCompare(tour.id)}
-            type="button"
-          >
-            {selected ? dict.selected : dict.compare}
-          </button>
-          <Link className="primary-button" href={`/tours/${tour.id}?lang=${locale}&scenario=${scenario}`}>
-            {dict.details}
-          </Link>
-        </div>
+    <form className="lead-form" onSubmit={onSubmit}>
+      <div>
+        <span className="eyebrow">{dict.leadTitle}</span>
+        <p>{dict.leadText}</p>
       </div>
-    </article>
+      <label>
+        {dict.name}
+        <input name="name" placeholder={dict.name} autoComplete="name" />
+      </label>
+      <label>
+        {dict.phone}
+        <input name="phone" placeholder="+7" autoComplete="tel" />
+      </label>
+      <label>
+        {dict.email}
+        <input name="email" placeholder="name@example.com" autoComplete="email" />
+      </label>
+      <label className="checkbox-row">
+        <input checked={consent} onChange={(event) => setConsent(event.target.checked)} type="checkbox" />
+        <span>{dict.consent}</span>
+      </label>
+      {submitState === "invalid" && <p className="form-message error">{dict.validationError}</p>}
+      {submitState === "error" && <p className="form-message error">{dict.sendError}</p>}
+      {submitState === "sent" && <p className="form-message success">{dict.sent}</p>}
+      <button className="primary-button full-width" disabled={submitState === "sending"} type="submit">
+        {submitState === "sending" ? dict.sending : dict.send}
+      </button>
+    </form>
   );
 }

@@ -1,142 +1,44 @@
-import Link from "next/link";
-import Image from "next/image";
-import { notFound } from "next/navigation";
-import { destinationById, getDestinationCopy } from "@/data/destinations";
-import { mockWeatherByDestination } from "@/data/mockWeather";
-import { getTourCopy, tourById } from "@/data/mockTours";
-import { ForecastStrip } from "@/components/ForecastStrip";
-import { LeadForm } from "@/components/LeadForm";
-import { RecommendationPanel } from "@/components/RecommendationPanel";
-import { WeatherBadge } from "@/components/WeatherBadge";
-import { formatCurrency, getDictionary, scenarioLabels } from "@/lib/i18n/dictionaries";
-import { buildWeatherRecommendation, getAverageWeather } from "@/lib/weather/recommendation";
-import type { Locale, TravelScenario } from "@/types/travel";
+import { getDictionary, scenarioLabels } from "@/lib/i18n/dictionaries";
+import type { Locale, WeatherRecommendation } from "@/types/travel";
 
-interface TourPageProps {
-  params: Promise<{ id: string }>;
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
+interface RecommendationPanelProps {
+  recommendation: WeatherRecommendation;
+  locale: Locale;
 }
 
-function normalizeLocale(value: string | string[] | undefined): Locale {
-  return value === "en" ? "en" : "ru";
-}
-
-function normalizeScenario(value: string | string[] | undefined): TravelScenario {
-  return value === "walk" || value === "excursion" || value === "family" ? value : "beach";
-}
-
-export default async function TourPage({ params, searchParams }: TourPageProps) {
-  const [{ id }, query] = await Promise.all([params, searchParams]);
-  const tour = tourById.get(id);
-
-  if (!tour) {
-    notFound();
-  }
-
-  const locale = normalizeLocale(query.lang);
-  const scenario = normalizeScenario(query.scenario);
+export function RecommendationPanel({ recommendation, locale }: RecommendationPanelProps) {
   const dict = getDictionary(locale);
-  const destination = destinationById.get(tour.destinationId);
-  const weather = mockWeatherByDestination[tour.destinationId];
-  const recommendation = buildWeatherRecommendation(scenario, weather.forecast, locale);
-  const averageWeather = getAverageWeather(weather.forecast);
-
-  if (!destination) {
-    notFound();
-  }
-
-  const tourCopy = getTourCopy(tour, locale);
-  const destinationCopy = getDestinationCopy(destination, locale);
 
   return (
-    <main>
-      <header className="topbar">
-        <Link className="brand" href={`/?lang=${locale}`}>
-          <span className="brand-mark">C</span>
-          <span>{dict.appName}</span>
-        </Link>
-        <Link className="secondary-button" href={`/?lang=${locale}`}>
-          {dict.back}
-        </Link>
-      </header>
-
-      <section className="tour-hero">
-        <Image alt={`${tourCopy.city} ${tourCopy.hotelName}`} height={760} src={tour.image} width={1000} />
-        <div className="tour-hero-content">
-          <span className="eyebrow">
-            {tourCopy.country} / {tourCopy.city}
-          </span>
-          <h1>{tourCopy.title}</h1>
-          <p>{tourCopy.description}</p>
-          <div className="tour-hero-meta">
-            <strong>{formatCurrency(tour.price, locale)}</strong>
-            <span>{tour.duration} {dict.nights}</span>
-            <span>{tourCopy.hotelName}</span>
-            <span>{scenarioLabels[locale][scenario]}</span>
-          </div>
-          <WeatherBadge
-            condition={weather.current.condition}
-            locale={locale}
-            status={recommendation.status}
-            temperature={weather.current.temperature}
-          />
+    <section className={`recommendation-panel ${recommendation.status}`}>
+      <div>
+        <span className="eyebrow">{scenarioLabels[locale][recommendation.scenario]}</span>
+        <h3>{recommendation.summary}</h3>
+      </div>
+      <div className="score-ring" aria-label={`Score ${recommendation.score}`}>
+        {recommendation.score}
+      </div>
+      <div className="recommendation-grid">
+        <div>
+          <h4>{dict.weatherSummary}</h4>
+          <ul>
+            {recommendation.reasons.map((reason) => (
+              <li key={reason}>{reason}</li>
+            ))}
+            {recommendation.warnings.map((warning) => (
+              <li key={warning}>{warning}</li>
+            ))}
+          </ul>
         </div>
-      </section>
-
-      <section className="tour-detail-grid">
-        <div className="tour-detail-main">
-          <RecommendationPanel locale={locale} recommendation={recommendation} />
-
-          <section className="detail-section">
-            <div className="section-heading compact">
-              <div>
-                <span className="eyebrow">{dict.forecast}</span>
-                <h2>{destinationCopy.city}</h2>
-              </div>
-              <p>{dict.legal}</p>
-            </div>
-            <ForecastStrip forecast={weather.forecast} locale={locale} />
-            <div className="weather-metrics">
-              <div>
-                <span>{dict.temperature}</span>
-                <strong>{averageWeather.temperature}°C</strong>
-              </div>
-              <div>
-                <span>{dict.rain}</span>
-                <strong>{averageWeather.precipitationProbability}%</strong>
-              </div>
-              <div>
-                <span>{dict.wind}</span>
-                <strong>{averageWeather.windSpeed} m/s</strong>
-              </div>
-              <div>
-                <span>{dict.humidity}</span>
-                <strong>{averageWeather.humidity}%</strong>
-              </div>
-            </div>
-          </section>
-
-          <section className="detail-section two-column">
-            <div>
-              <span className="eyebrow">{dict.bestTime}</span>
-              <h2>{destinationCopy.bestTimeToGo}</h2>
-              <p>{destinationCopy.climateSummary}</p>
-            </div>
-            <div>
-              <span className="eyebrow">{dict.included}</span>
-              <ul className="included-list">
-                {tourCopy.included.map((item) => (
-                  <li key={item}>{item}</li>
-                ))}
-              </ul>
-            </div>
-          </section>
+        <div>
+          <h4>{dict.packing}</h4>
+          <ul>
+            {recommendation.packingTips.map((tip) => (
+              <li key={tip}>{tip}</li>
+            ))}
+          </ul>
         </div>
-
-        <aside className="tour-detail-aside">
-          <LeadForm locale={locale} tourId={tour.id} />
-        </aside>
-      </section>
-    </main>
+      </div>
+    </section>
   );
 }
